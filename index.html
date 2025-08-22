@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oregon Bunny Trail - Adventure Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>Oregon Bunny Trail</h1>
+            <div class="game-stats">
+                <span class="stat">Distance: <span id="distance">0</span> miles</span>
+                <span class="stat">Carrots: <span id="carrots">0</span></span>
+                <span class="stat">Energy: <span id="energy">100</span>%</span>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div class="game-controls">
+            <button id="startBtn" class="btn">Start Adventure</button>
+            <div class="instructions">
+                <p>Help Oregon Bunny reach Oregon! Use ← → arrows to move, SPACE to jump</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
