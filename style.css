@@ -172,13 +172,20 @@ body {
 }
 
 /* Show mobile controls on touch devices */
-@media (hover: none) and (pointer: coarse) {
+@media (pointer: coarse) {
     .mobile-controls {
         display: flex;
     }
     
     .instructions p {
         font-size: 0.8rem;
+    }
+}
+
+/* Also show on devices that support touch */
+@media (any-pointer: coarse) {
+    .mobile-controls {
+        display: flex;
     }
 }
 
