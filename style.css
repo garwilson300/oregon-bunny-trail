@@ -113,12 +113,20 @@ body {
     font-size: 0.9rem;
 }
 
+/* Game area layout */
+.game-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
 /* Mobile controls */
 .mobile-controls {
     display: none;
-    justify-content: space-around;
-    margin: 20px 0;
-    gap: 40px;
+    justify-content: center;
+    align-items: center;
 }
 
 .player1-controls,
@@ -172,7 +180,7 @@ body {
 }
 
 /* Show mobile controls on touch devices */
-@media (pointer: coarse) {
+@media (pointer: coarse), (any-pointer: coarse) {
     .mobile-controls {
         display: flex;
     }
@@ -182,10 +190,30 @@ body {
     }
 }
 
-/* Also show on devices that support touch */
-@media (any-pointer: coarse) {
-    .mobile-controls {
+/* Layout adjustments for different screen sizes */
+@media (max-width: 1024px) {
+    /* On medium screens, stack controls below canvas */
+    .game-area {
+        flex-direction: column;
+    }
+    
+    .left-controls,
+    .right-controls {
         display: flex;
+        gap: 40px;
+    }
+    
+    .left-controls {
+        order: 2;
+    }
+    
+    #gameCanvas {
+        order: 1;
+    }
+    
+    .right-controls {
+        order: 3;
+        margin-top: -20px;
     }
 }
 
@@ -212,6 +240,10 @@ body {
         width: 100%;
         height: auto;
         max-width: 600px;
+    }
+    
+    .game-area {
+        flex-direction: column;
     }
     
     .mobile-controls {
