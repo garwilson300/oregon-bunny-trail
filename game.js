@@ -874,11 +874,13 @@ function gameLoop() {
         if (player1Stats.energy <= 0 && player2Stats.energy <= 0) {
             game.gameOver = true;
             game.running = false;
+            document.getElementById('startBtn').textContent = 'Start Adventure';
         }
     } else {
         if (player1Stats.energy <= 0) {
             game.gameOver = true;
             game.running = false;
+            document.getElementById('startBtn').textContent = 'Start Adventure';
         }
     }
     
