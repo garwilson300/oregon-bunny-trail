@@ -38,9 +38,9 @@ const vehicles = [];
 // Oregon Bunny Character
 const bunny = {
     x: 100,
-    y: 250,
-    width: 50,
-    height: 60,
+    y: 260,
+    width: 30,
+    height: 35,
     velocityY: 0,
     jumping: false,
     color: '#D8BFD8', // Light lavender purple like Oregon Bunny
@@ -64,67 +64,67 @@ const bunny = {
         // Bunny body (round and fluffy)
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2, this.height/2.2, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2.2, this.height/2.5, 0, 0, Math.PI * 2);
         ctx.fill();
         
         // Bunny head (rounder to match Oregon Bunny)
         ctx.beginPath();
-        ctx.arc(this.x + this.width/2, this.y + 18, 22, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width/2, this.y + 10, 12, 0, Math.PI * 2);
         ctx.fill();
         
         // Long floppy ears
         ctx.fillStyle = this.color;
         // Left ear
         ctx.save();
-        ctx.translate(this.x + 18, this.y + 5);
+        ctx.translate(this.x + 11, this.y + 3);
         ctx.rotate(-0.5 + this.earAngle);
         ctx.beginPath();
-        ctx.ellipse(0, -15, 10, 25, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -8, 5, 15, 0, 0, Math.PI * 2);
         ctx.fill();
         // Inner left ear
         ctx.fillStyle = this.earColor;
         ctx.beginPath();
-        ctx.ellipse(0, -15, 5, 18, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -8, 3, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         
         // Right ear
         ctx.save();
-        ctx.translate(this.x + 32, this.y + 5);
+        ctx.translate(this.x + 19, this.y + 3);
         ctx.rotate(0.5 - this.earAngle);
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.ellipse(0, -15, 10, 25, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -8, 5, 15, 0, 0, Math.PI * 2);
         ctx.fill();
         // Inner right ear
         ctx.fillStyle = this.earColor;
         ctx.beginPath();
-        ctx.ellipse(0, -15, 5, 18, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -8, 3, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         
         // Eyes (smaller and closer together like Oregon Bunny)
         ctx.fillStyle = 'black';
         ctx.beginPath();
-        ctx.arc(this.x + 20, this.y + 18, 2, 0, Math.PI * 2);
+        ctx.arc(this.x + 12, this.y + 10, 1.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x + 30, this.y + 18, 2, 0, Math.PI * 2);
+        ctx.arc(this.x + 18, this.y + 10, 1.5, 0, Math.PI * 2);
         ctx.fill();
         
         // Pink nose (triangular like Oregon Bunny)
         ctx.fillStyle = '#FFB6C1';
         ctx.beginPath();
-        ctx.moveTo(this.x + 25, this.y + 26);
-        ctx.lineTo(this.x + 22, this.y + 23);
-        ctx.lineTo(this.x + 28, this.y + 23);
+        ctx.moveTo(this.x + 15, this.y + 15);
+        ctx.lineTo(this.x + 13, this.y + 13);
+        ctx.lineTo(this.x + 17, this.y + 13);
         ctx.closePath();
         ctx.fill();
         
         // Small fluffy tail
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(this.x - 3, this.y + this.height/2, 10, 0, Math.PI * 2);
+        ctx.arc(this.x - 2, this.y + this.height/2, 6, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.restore();
@@ -158,13 +158,13 @@ const bunny = {
         
         switch(direction) {
             case 'up':
-                if (this.y > 100 && !this.jumping) {
+                if (this.y > 160 && !this.jumping) {
                     this.targetY = this.y - hopDistance;
                     this.jumping = true;
                 }
                 break;
             case 'down':
-                if (this.y < 300 && !this.jumping) {
+                if (this.y < 310 && !this.jumping) {
                     this.targetY = this.y + hopDistance;
                     this.jumping = true;
                 }
@@ -188,9 +188,9 @@ const bunny = {
 // Orange Cat Character (Player 2)
 const orangeCat = {
     x: 100,
-    y: 200,
-    width: 55,
-    height: 45,
+    y: 210,
+    width: 35,
+    height: 30,
     active: false,
     jumping: false,
     tailWag: 0,
@@ -212,17 +212,17 @@ const orangeCat = {
         
         // Cat tail (drawn first so it appears behind)
         ctx.save();
-        ctx.translate(this.x - 5, this.y + this.height/2);
+        ctx.translate(this.x - 3, this.y + this.height/2);
         ctx.rotate(this.tailWag);
         ctx.fillStyle = '#FF8C00';
         ctx.beginPath();
-        ctx.ellipse(0, 0, 30, 8, -0.3, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 20, 5, -0.3, 0, Math.PI * 2);
         ctx.fill();
         // Tail stripes
         ctx.fillStyle = '#D2691E';
         for (let i = 0; i < 3; i++) {
             ctx.beginPath();
-            ctx.ellipse(-10 + i * 10, 0, 4, 6, -0.3, 0, Math.PI * 2);
+            ctx.ellipse(-6 + i * 6, 0, 3, 4, -0.3, 0, Math.PI * 2);
             ctx.fill();
         }
         ctx.restore();
@@ -230,106 +230,106 @@ const orangeCat = {
         // Cat body
         ctx.fillStyle = '#FF8C00';
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2, this.height/2.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2.2, this.height/3, 0, 0, Math.PI * 2);
         ctx.fill();
         
         // Body stripes
         ctx.fillStyle = '#D2691E';
         for (let i = 0; i < 3; i++) {
             ctx.beginPath();
-            ctx.rect(this.x + 15 + i * 12, this.y + 10, 3, this.height - 15);
+            ctx.rect(this.x + 8 + i * 7, this.y + 8, 2, this.height - 12);
             ctx.fill();
         }
         
         // Cat head
         ctx.fillStyle = '#FF8C00';
         ctx.beginPath();
-        ctx.arc(this.x + this.width/2, this.y + 15, 18, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width/2, this.y + 10, 11, 0, Math.PI * 2);
         ctx.fill();
         
         // Head stripes
         ctx.fillStyle = '#D2691E';
         ctx.beginPath();
-        ctx.arc(this.x + this.width/2 - 10, this.y + 10, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width/2 - 6, this.y + 6, 2, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x + this.width/2 + 10, this.y + 10, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width/2 + 6, this.y + 6, 2, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x + this.width/2, this.y + 5, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width/2, this.y + 3, 2, 0, Math.PI * 2);
         ctx.fill();
         
         // Cat ears (triangular)
         ctx.fillStyle = '#FF8C00';
         ctx.beginPath();
-        ctx.moveTo(this.x + 15, this.y + 5);
-        ctx.lineTo(this.x + 10, this.y - 5);
-        ctx.lineTo(this.x + 20, this.y);
+        ctx.moveTo(this.x + 10, this.y + 3);
+        ctx.lineTo(this.x + 7, this.y - 3);
+        ctx.lineTo(this.x + 13, this.y);
         ctx.closePath();
         ctx.fill();
         
         ctx.beginPath();
-        ctx.moveTo(this.x + 35, this.y + 5);
-        ctx.lineTo(this.x + 40, this.y - 5);
-        ctx.lineTo(this.x + 30, this.y);
+        ctx.moveTo(this.x + 25, this.y + 3);
+        ctx.lineTo(this.x + 28, this.y - 3);
+        ctx.lineTo(this.x + 22, this.y);
         ctx.closePath();
         ctx.fill();
         
         // Inner ears
         ctx.fillStyle = '#FFB6C1';
         ctx.beginPath();
-        ctx.moveTo(this.x + 15, this.y + 2);
-        ctx.lineTo(this.x + 13, this.y - 2);
-        ctx.lineTo(this.x + 17, this.y);
+        ctx.moveTo(this.x + 10, this.y + 1);
+        ctx.lineTo(this.x + 9, this.y - 1);
+        ctx.lineTo(this.x + 11, this.y);
         ctx.closePath();
         ctx.fill();
         
         ctx.beginPath();
-        ctx.moveTo(this.x + 35, this.y + 2);
-        ctx.lineTo(this.x + 37, this.y - 2);
-        ctx.lineTo(this.x + 33, this.y);
+        ctx.moveTo(this.x + 25, this.y + 1);
+        ctx.lineTo(this.x + 26, this.y - 1);
+        ctx.lineTo(this.x + 24, this.y);
         ctx.closePath();
         ctx.fill();
         
         // Green eyes
         ctx.fillStyle = '#228B22';
         ctx.beginPath();
-        ctx.arc(this.x + 20, this.y + 15, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + 13, this.y + 10, 2, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x + 30, this.y + 15, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + 22, this.y + 10, 2, 0, Math.PI * 2);
         ctx.fill();
         
         // Eye pupils
         ctx.fillStyle = 'black';
         ctx.beginPath();
-        ctx.arc(this.x + 20, this.y + 15, 1.5, 0, Math.PI * 2);
+        ctx.arc(this.x + 13, this.y + 10, 1, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x + 30, this.y + 15, 1.5, 0, Math.PI * 2);
+        ctx.arc(this.x + 22, this.y + 10, 1, 0, Math.PI * 2);
         ctx.fill();
         
         // Pink nose
         ctx.fillStyle = '#FFB6C1';
         ctx.beginPath();
-        ctx.moveTo(this.x + 25, this.y + 20);
-        ctx.lineTo(this.x + 22, this.y + 18);
-        ctx.lineTo(this.x + 28, this.y + 18);
+        ctx.moveTo(this.x + 17.5, this.y + 13);
+        ctx.lineTo(this.x + 16, this.y + 11.5);
+        ctx.lineTo(this.x + 19, this.y + 11.5);
         ctx.closePath();
         ctx.fill();
         
         // Whiskers
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 0.5;
         ctx.beginPath();
-        ctx.moveTo(this.x + 10, this.y + 20);
-        ctx.lineTo(this.x, this.y + 18);
-        ctx.moveTo(this.x + 10, this.y + 22);
-        ctx.lineTo(this.x, this.y + 22);
-        ctx.moveTo(this.x + 40, this.y + 20);
-        ctx.lineTo(this.x + 50, this.y + 18);
-        ctx.moveTo(this.x + 40, this.y + 22);
-        ctx.lineTo(this.x + 50, this.y + 22);
+        ctx.moveTo(this.x + 7, this.y + 12);
+        ctx.lineTo(this.x + 2, this.y + 11);
+        ctx.moveTo(this.x + 7, this.y + 14);
+        ctx.lineTo(this.x + 2, this.y + 14);
+        ctx.moveTo(this.x + 28, this.y + 12);
+        ctx.lineTo(this.x + 33, this.y + 11);
+        ctx.moveTo(this.x + 28, this.y + 14);
+        ctx.lineTo(this.x + 33, this.y + 14);
         ctx.stroke();
         
         ctx.restore();
@@ -364,13 +364,13 @@ const orangeCat = {
         
         switch(direction) {
             case 'up':
-                if (this.y > 100 && !this.jumping) {
+                if (this.y > 160 && !this.jumping) {
                     this.targetY = this.y - hopDistance;
                     this.jumping = true;
                 }
                 break;
             case 'down':
-                if (this.y < 300 && !this.jumping) {
+                if (this.y < 310 && !this.jumping) {
                     this.targetY = this.y + hopDistance;
                     this.jumping = true;
                 }
@@ -923,7 +923,7 @@ function gameLoop() {
             startX = -80;
         }
         
-        const vehicle = new Vehicle(startX, LANE_Y[lane] + 10, lane, type);
+        const vehicle = new Vehicle(startX, LANE_Y[lane] + 5, lane, type);
         vehicles.push(vehicle);
     }
     
@@ -976,7 +976,7 @@ function gameLoop() {
         if (vehicle.checkCollision(bunny)) {
             // Reset bunny position
             bunny.x = 100;
-            bunny.y = 250;
+            bunny.y = 260;
             bunny.targetX = bunny.x;
             bunny.targetY = bunny.y;
             // Lose some energy on collision
@@ -987,7 +987,7 @@ function gameLoop() {
         if (game.multiplayer && orangeCat.active && vehicle.checkCollision(orangeCat)) {
             // Reset orange cat position
             orangeCat.x = 100;
-            orangeCat.y = 200;
+            orangeCat.y = 210;
             orangeCat.targetX = orangeCat.x;
             orangeCat.targetY = orangeCat.y;
             // Lose some energy on collision
@@ -1053,11 +1053,11 @@ document.getElementById('startBtn').addEventListener('click', () => {
             vehicles.length = 0;
             // Reset character positions
             bunny.x = 100;
-            bunny.y = 250;
+            bunny.y = 260;
             bunny.targetX = bunny.x;
             bunny.targetY = bunny.y;
             orangeCat.x = 100;
-            orangeCat.y = 200;
+            orangeCat.y = 210;
             orangeCat.targetX = orangeCat.x;
             orangeCat.targetY = orangeCat.y;
         }
@@ -1099,7 +1099,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
         multiStats.style.display = 'flex';
         // Reset Orange Cat position
         orangeCat.x = 100;
-        orangeCat.y = 200;
+        orangeCat.y = 210;
         orangeCat.targetX = orangeCat.x;
         orangeCat.targetY = orangeCat.y;
         // Reset player 2 stats
