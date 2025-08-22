@@ -5,7 +5,7 @@
 }
 
 body {
-    font-family: 'Fredoka', cursive;
+    font-family: 'Press Start 2P', cursive;
     background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 100%);
     min-height: 100vh;
     display: flex;
@@ -37,25 +37,27 @@ body {
 
 .game-header h1 {
     color: #5a9fd4;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 10px;
+    font-size: 1.8rem;
+    font-weight: 400;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 15px;
+    letter-spacing: 2px;
 }
 
 .game-stats {
     display: flex;
     justify-content: center;
     gap: 30px;
-    font-size: 1.1rem;
+    font-size: 0.7rem;
 }
 
 .stat {
     background: #ffd700;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: 400;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    letter-spacing: 1px;
 }
 
 .multiplayer-stats {
@@ -70,8 +72,8 @@ body {
 }
 
 .player-label {
-    font-weight: 700;
-    font-size: 1.1rem;
+    font-weight: 400;
+    font-size: 0.7rem;
     min-width: 100px;
 }
 
@@ -95,15 +97,17 @@ body {
 .btn {
     background: #5a9fd4;
     color: white;
-    border: none;
-    padding: 12px 30px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    border-radius: 25px;
+    border: 3px solid #333;
+    padding: 10px 25px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: 'Fredoka', cursive;
+    font-family: 'Press Start 2P', cursive;
     margin: 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .btn:hover {
@@ -121,7 +125,8 @@ body {
 }
 
 .instructions p {
-    font-size: 0.9rem;
+    font-size: 0.6rem;
+    line-height: 1.6;
 }
 
 /* Game area layout */
@@ -149,10 +154,11 @@ body {
 }
 
 .control-label {
-    font-weight: 700;
+    font-weight: 400;
     color: #5a9fd4;
     margin-bottom: 10px;
-    font-size: 1rem;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
 }
 
 .dpad {
@@ -270,16 +276,18 @@ body {
 }
 
 .portrait-message h2 {
-    font-family: 'Fredoka', cursive;
-    font-size: 2rem;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2rem;
     margin: 20px 0;
     color: #5a9fd4;
+    line-height: 1.8;
 }
 
 .portrait-message p {
-    font-family: 'Fredoka', cursive;
-    font-size: 1.2rem;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
     margin-bottom: 30px;
+    line-height: 1.8;
 }
 
 .rotate-icon {

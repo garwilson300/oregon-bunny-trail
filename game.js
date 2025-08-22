@@ -896,7 +896,7 @@ function drawGameOver() {
     
     // Game over text
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 48px Fredoka';
+    ctx.font = '24px "Press Start 2P"';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
@@ -904,27 +904,27 @@ function drawGameOver() {
         // Check which player(s) ran out of energy
         if (player1Stats.energy <= 0 && player2Stats.energy <= 0) {
             ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
-            ctx.font = '24px Fredoka';
+            ctx.font = '12px "Press Start 2P"';
             ctx.fillText('Both players ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
         } else if (player1Stats.energy <= 0) {
             ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
-            ctx.font = '24px Fredoka';
+            ctx.font = '12px "Press Start 2P"';
             ctx.fillText('Oregon Bunny ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
             ctx.fillText('Orange Cat wins!', gameWidth / 2, gameHeight / 2 + 40);
         } else if (player2Stats.energy <= 0) {
             ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
-            ctx.font = '24px Fredoka';
+            ctx.font = '12px "Press Start 2P"';
             ctx.fillText('Orange Cat ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
             ctx.fillText('Oregon Bunny wins!', gameWidth / 2, gameHeight / 2 + 40);
         }
     } else {
         ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
-        ctx.font = '24px Fredoka';
+        ctx.font = '12px "Press Start 2P"';
         ctx.fillText('Oregon Bunny ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
     }
     
     // Restart instruction
-    ctx.font = '20px Fredoka';
+    ctx.font = '10px "Press Start 2P"';
     ctx.fillText('Click "Start Adventure" to play again', gameWidth / 2, gameHeight / 2 + 80);
 }
 
