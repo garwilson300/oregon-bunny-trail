@@ -833,10 +833,13 @@ function drawBackground() {
     ctx.fillStyle = '#8FBC8F';
     ctx.fillRect(0, 100, canvas.width, 50);
     
-    // Simple moving clouds
+    // Simple moving clouds (move slowly)
     ctx.fillStyle = 'white';
     for (let i = 0; i < 3; i++) {
-        const cloudX = (game.backgroundX + i * 300) % (canvas.width + 100) - 100;
+        // Clouds move at 1/10th the speed, same direction as background (left)
+        // Use modulo with fixed width (900) to ensure proper looping
+        let cloudOffset = (game.backgroundX * 0.1 + i * 300);
+        let cloudX = ((cloudOffset % 900) + 900) % 900 - 100;
         drawCloud(cloudX, 30 + i * 20);
     }
     
