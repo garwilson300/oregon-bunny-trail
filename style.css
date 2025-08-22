@@ -251,6 +251,129 @@ body {
     }
 }
 
+/* Portrait orientation message */
+.portrait-message {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 100%);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #333;
+    padding: 20px;
+}
+
+.portrait-message h2 {
+    font-family: 'Fredoka', cursive;
+    font-size: 2rem;
+    margin: 20px 0;
+    color: #5a9fd4;
+}
+
+.portrait-message p {
+    font-family: 'Fredoka', cursive;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.rotate-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.rotate-animation {
+    font-size: 3rem;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Show portrait message on mobile in portrait orientation */
+@media (max-width: 768px) and (orientation: portrait) {
+    .portrait-message {
+        display: flex;
+    }
+    
+    .game-container {
+        display: none;
+    }
+}
+
+/* Force landscape layout on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        padding: 5px;
+    }
+    
+    .game-container {
+        height: calc(100vh - 10px);
+        padding: 10px;
+    }
+    
+    .game-header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .game-stats {
+        margin-bottom: 10px;
+    }
+    
+    .stat {
+        font-size: 0.9rem;
+        padding: 2px 8px;
+    }
+    
+    .game-area {
+        margin: 10px 0;
+    }
+    
+    .game-controls {
+        margin-top: 10px;
+    }
+    
+    .btn {
+        padding: 8px 20px;
+        font-size: 1rem;
+        margin: 0 5px;
+    }
+    
+    .instructions {
+        margin-top: 5px;
+    }
+    
+    .instructions p {
+        font-size: 0.7rem;
+    }
+    
+    .control-label {
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+    
+    .dpad-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    /* Hide mobile controls in landscape if not touch device */
+    @media (hover: hover) {
+        .mobile-controls {
+            display: none !important;
+        }
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .game-container {

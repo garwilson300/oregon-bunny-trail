@@ -1,6 +1,6 @@
 // Game Canvas and Context
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+let ctx = canvas.getContext('2d');
 
 // Game State
 const game = {
@@ -46,8 +46,20 @@ const bunny = {
     color: '#D8BFD8', // Light lavender purple like Oregon Bunny
     earColor: '#E6D6E6', // Even lighter purple for inner ears
     earAngle: 0, // For floppy ear animation
+    targetX: 100, // Initialize target position
+    targetY: 260,
+    invulnerable: false, // Temporary invulnerability after being hit
+    invulnerableTimer: 0,
     
     draw() {
+        // Don't draw if energy is depleted
+        if (player1Stats.energy <= 0) return;
+        
+        // Flash when invulnerable (but only if still has energy)
+        if (this.invulnerable && player1Stats.energy > 0 && Math.floor(this.invulnerableTimer / 5) % 2 === 0) {
+            return; // Skip drawing every 5 frames for flashing effect
+        }
+        
         // Save context state
         ctx.save();
         
@@ -131,12 +143,23 @@ const bunny = {
     },
     
     update() {
+        // Handle invulnerability timer (only if still has energy)
+        if (this.invulnerable && this.invulnerableTimer > 0 && player1Stats.energy > 0) {
+            this.invulnerableTimer--;
+            if (this.invulnerableTimer <= 0) {
+                this.invulnerable = false;
+            }
+        }
+        
         // No gravity for Frogger-style movement
         // Smooth transition to target position
+        let movementComplete = true;
+        
         if (this.targetX !== undefined) {
             const dx = this.targetX - this.x;
             if (Math.abs(dx) > 1) {
                 this.x += dx * 0.3; // Smooth hopping motion
+                movementComplete = false;
             } else {
                 this.x = this.targetX;
             }
@@ -146,10 +169,15 @@ const bunny = {
             const dy = this.targetY - this.y;
             if (Math.abs(dy) > 1) {
                 this.y += dy * 0.3; // Smooth hopping motion
+                movementComplete = false;
             } else {
                 this.y = this.targetY;
-                this.jumping = false;
             }
+        }
+        
+        // Reset jumping flag when movement is complete
+        if (movementComplete && this.jumping) {
+            this.jumping = false;
         }
     },
     
@@ -176,8 +204,8 @@ const bunny = {
                 }
                 break;
             case 'right':
-                if (this.x < canvas.width - this.width && !this.jumping) {
-                    this.targetX = Math.min(canvas.width - this.width, this.x + hopDistance);
+                if (this.x < 800 - this.width && !this.jumping) {
+                    this.targetX = Math.min(800 - this.width, this.x + hopDistance);
                     this.jumping = true;
                 }
                 break;
@@ -194,9 +222,21 @@ const orangeCat = {
     active: false,
     jumping: false,
     tailWag: 0,
+    targetX: 100, // Initialize target position
+    targetY: 210,
+    invulnerable: false, // Temporary invulnerability after being hit
+    invulnerableTimer: 0,
     
     draw() {
         if (!this.active) return;
+        
+        // Don't draw if energy is depleted
+        if (player2Stats.energy <= 0) return;
+        
+        // Flash when invulnerable (but only if still has energy)
+        if (this.invulnerable && player2Stats.energy > 0 && Math.floor(this.invulnerableTimer / 5) % 2 === 0) {
+            return; // Skip drawing every 5 frames for flashing effect
+        }
         
         ctx.save();
         
@@ -338,11 +378,22 @@ const orangeCat = {
     update() {
         if (!this.active) return;
         
+        // Handle invulnerability timer (only if still has energy)
+        if (this.invulnerable && this.invulnerableTimer > 0 && player2Stats.energy > 0) {
+            this.invulnerableTimer--;
+            if (this.invulnerableTimer <= 0) {
+                this.invulnerable = false;
+            }
+        }
+        
         // Same movement system as bunny
+        let movementComplete = true;
+        
         if (this.targetX !== undefined) {
             const dx = this.targetX - this.x;
             if (Math.abs(dx) > 1) {
                 this.x += dx * 0.3;
+                movementComplete = false;
             } else {
                 this.x = this.targetX;
             }
@@ -352,10 +403,15 @@ const orangeCat = {
             const dy = this.targetY - this.y;
             if (Math.abs(dy) > 1) {
                 this.y += dy * 0.3;
+                movementComplete = false;
             } else {
                 this.y = this.targetY;
-                this.jumping = false;
             }
+        }
+        
+        // Reset jumping flag when movement is complete
+        if (movementComplete && this.jumping) {
+            this.jumping = false;
         }
     },
     
@@ -382,8 +438,8 @@ const orangeCat = {
                 }
                 break;
             case 'right':
-                if (this.x < canvas.width - this.width && !this.jumping) {
-                    this.targetX = Math.min(canvas.width - this.width, this.x + hopDistance);
+                if (this.x < 800 - this.width && !this.jumping) {
+                    this.targetX = Math.min(800 - this.width, this.x + hopDistance);
                     this.jumping = true;
                 }
                 break;
@@ -395,24 +451,25 @@ const orangeCat = {
 let keyPressed = {};
 
 document.addEventListener('keydown', (e) => {
+    // Always prevent default for arrow keys to avoid scrolling
+    if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+    }
+    
     if (!keyPressed[e.key] && game.running && !game.gameOver) {
         keyPressed[e.key] = true;
         
         switch(e.key) {
             case 'ArrowUp':
-                e.preventDefault();
                 if (player1Stats.energy > 0) bunny.hop('up');
                 break;
             case 'ArrowDown':
-                e.preventDefault();
                 if (player1Stats.energy > 0) bunny.hop('down');
                 break;
             case 'ArrowLeft':
-                e.preventDefault();
                 if (player1Stats.energy > 0) bunny.hop('left');
                 break;
             case 'ArrowRight':
-                e.preventDefault();
                 if (player1Stats.energy > 0) bunny.hop('right');
                 break;
             // WASD controls for Orange Cat (Player 2)
@@ -447,6 +504,19 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
     keyPressed[e.key] = false;
 });
+
+// Safeguard: Clear all key states when window loses focus
+window.addEventListener('blur', () => {
+    keyPressed = {};
+});
+
+// Safeguard: Reset key states periodically to prevent stuck keys
+setInterval(() => {
+    // Only reset if game is not running to avoid interfering with active gameplay
+    if (!game.running) {
+        keyPressed = {};
+    }
+}, 1000);
 
 // Carrot class
 class Carrot {
@@ -640,8 +710,34 @@ class Vehicle {
         return colors[Math.floor(Math.random() * colors.length)];
     }
     
-    update() {
-        this.x += this.speed * this.direction;
+    update(allVehicles) {
+        // Check for vehicles ahead in the same lane
+        let canMove = true;
+        const safeDistance = 10; // Minimum gap between vehicles
+        
+        for (let other of allVehicles) {
+            if (other === this || other.lane !== this.lane) continue;
+            
+            // Check if another vehicle is blocking our path
+            if (this.direction > 0) { // Moving right
+                // Check if there's a vehicle ahead to the right
+                if (other.x > this.x && other.x < this.x + this.width + safeDistance + this.speed) {
+                    canMove = false;
+                    break;
+                }
+            } else { // Moving left
+                // Check if there's a vehicle ahead to the left
+                if (other.x < this.x && other.x + other.width > this.x - safeDistance - this.speed) {
+                    canMove = false;
+                    break;
+                }
+            }
+        }
+        
+        // Only move if path is clear
+        if (canMove) {
+            this.x += this.speed * this.direction;
+        }
     }
     
     draw() {
@@ -790,9 +886,13 @@ function drawCloud(x, y) {
 
 // Draw game over screen
 function drawGameOver() {
+    // Use original game dimensions, not scaled canvas dimensions
+    const gameWidth = 800;
+    const gameHeight = 400;
+    
     // Semi-transparent overlay
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, gameWidth, gameHeight);
     
     // Game over text
     ctx.fillStyle = 'white';
@@ -803,29 +903,29 @@ function drawGameOver() {
     if (game.multiplayer) {
         // Check which player(s) ran out of energy
         if (player1Stats.energy <= 0 && player2Stats.energy <= 0) {
-            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
             ctx.font = '24px Fredoka';
-            ctx.fillText('Both players ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
+            ctx.fillText('Both players ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
         } else if (player1Stats.energy <= 0) {
-            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
             ctx.font = '24px Fredoka';
-            ctx.fillText('Oregon Bunny ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
-            ctx.fillText('Orange Cat wins!', canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText('Oregon Bunny ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
+            ctx.fillText('Orange Cat wins!', gameWidth / 2, gameHeight / 2 + 40);
         } else if (player2Stats.energy <= 0) {
-            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
             ctx.font = '24px Fredoka';
-            ctx.fillText('Orange Cat ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
-            ctx.fillText('Oregon Bunny wins!', canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText('Orange Cat ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
+            ctx.fillText('Oregon Bunny wins!', gameWidth / 2, gameHeight / 2 + 40);
         }
     } else {
-        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+        ctx.fillText('GAME OVER', gameWidth / 2, gameHeight / 2 - 40);
         ctx.font = '24px Fredoka';
-        ctx.fillText('Oregon Bunny ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
+        ctx.fillText('Oregon Bunny ran out of energy!', gameWidth / 2, gameHeight / 2 + 10);
     }
     
     // Restart instruction
     ctx.font = '20px Fredoka';
-    ctx.fillText('Click "Start Adventure" to play again', canvas.width / 2, canvas.height / 2 + 80);
+    ctx.fillText('Click "Start Adventure" to play again', gameWidth / 2, gameHeight / 2 + 80);
 }
 
 // Update game stats display
@@ -849,7 +949,13 @@ function updateStats() {
 function gameLoop() {
     if (!game.running) return;
     
-    // Clear canvas (use original dimensions)
+    // Ensure transform is applied at start of each frame
+    // Use fallback values if not set
+    const currentDpr = dpr || 1;
+    const currentScale = renderScale || 1;
+    ctx.setTransform(currentDpr * currentScale, 0, 0, currentDpr * currentScale, 0, 0);
+    
+    // Clear canvas
     ctx.clearRect(0, 0, 800, 400);
     
     // Update game
@@ -972,28 +1078,40 @@ function gameLoop() {
     // Update vehicles
     for (let i = vehicles.length - 1; i >= 0; i--) {
         const vehicle = vehicles[i];
-        vehicle.update();
+        vehicle.update(vehicles);
         
-        // Check collision with bunny
-        if (vehicle.checkCollision(bunny)) {
-            // Reset bunny position
-            bunny.x = 100;
-            bunny.y = 260;
-            bunny.targetX = bunny.x;
-            bunny.targetY = bunny.y;
-            // Lose some energy on collision
-            player1Stats.energy = Math.max(0, player1Stats.energy - 25);
+        // Check collision with bunny (only if bunny has energy and not invulnerable)
+        if (player1Stats.energy > 0 && !bunny.invulnerable && vehicle.checkCollision(bunny)) {
+            // Only reset position if still has energy after collision
+            const newEnergy = Math.max(0, player1Stats.energy - 25);
+            if (newEnergy > 0) {
+                // Reset bunny position
+                bunny.x = 100;
+                bunny.y = 260;
+                bunny.targetX = bunny.x;
+                bunny.targetY = bunny.y;
+            }
+            player1Stats.energy = newEnergy;
+            // Make bunny invulnerable for 60 frames (1 second at 60fps)
+            bunny.invulnerable = true;
+            bunny.invulnerableTimer = 60;
         }
         
-        // Check collision with orange cat in multiplayer
-        if (game.multiplayer && orangeCat.active && vehicle.checkCollision(orangeCat)) {
-            // Reset orange cat position
-            orangeCat.x = 100;
-            orangeCat.y = 210;
-            orangeCat.targetX = orangeCat.x;
-            orangeCat.targetY = orangeCat.y;
-            // Lose some energy on collision
-            player2Stats.energy = Math.max(0, player2Stats.energy - 25);
+        // Check collision with orange cat in multiplayer (only if cat has energy and not invulnerable)
+        if (game.multiplayer && orangeCat.active && player2Stats.energy > 0 && !orangeCat.invulnerable && vehicle.checkCollision(orangeCat)) {
+            // Only reset position if still has energy after collision
+            const newEnergy = Math.max(0, player2Stats.energy - 25);
+            if (newEnergy > 0) {
+                // Reset orange cat position
+                orangeCat.x = 100;
+                orangeCat.y = 210;
+                orangeCat.targetX = orangeCat.x;
+                orangeCat.targetY = orangeCat.y;
+            }
+            player2Stats.energy = newEnergy;
+            // Make orange cat invulnerable for 60 frames (1 second at 60fps)
+            orangeCat.invulnerable = true;
+            orangeCat.invulnerableTimer = 60;
         }
         
         // Remove vehicles that have gone off screen
@@ -1136,6 +1254,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
 
 // Scale factor for rendering
 let renderScale = 1;
+let dpr = 1;
 
 // Canvas resizing
 function resizeCanvas() {
@@ -1161,7 +1280,7 @@ function resizeCanvas() {
     }
     
     // Get device pixel ratio for crisp rendering
-    const dpr = window.devicePixelRatio || 1;
+    dpr = window.devicePixelRatio || 1;
     
     // Calculate render scale based on new size vs original size
     renderScale = newWidth / 800;
@@ -1170,7 +1289,10 @@ function resizeCanvas() {
     canvas.width = newWidth * dpr;
     canvas.height = newHeight * dpr;
     
-    // Scale canvas context for device pixel ratio
+    // Re-acquire context after changing canvas dimensions
+    ctx = canvas.getContext('2d');
+    
+    // Scale canvas context for device pixel ratio and render scale
     ctx.scale(dpr * renderScale, dpr * renderScale);
     
     // Update canvas display size (CSS)
@@ -1187,13 +1309,22 @@ function resizeCanvas() {
     }
 }
 
-// Handle window resize
-window.addEventListener('resize', resizeCanvas);
+// Handle window resize with debouncing to prevent issues
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        resizeCanvas();
+    }, 100);
+});
 
 // Initial setup
 resizeCanvas();
 drawBackground();
 bunny.draw();
+
+// Simple focus management - canvas doesn't need focus for document-level key events
+// Just prevent scrolling on arrow keys which is handled in the keydown listener
 
 // Mobile controls
 const mobileButtons = document.querySelectorAll('.dpad-btn');
