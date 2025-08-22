@@ -11,8 +11,13 @@ const game = {
     speed: 2,
     gravity: 0.5,
     backgroundX: 0,
-    multiplayer: false
+    multiplayer: false,
+    carrotSpawnTimer: 0,
+    carrotSpawnInterval: 120 // frames between carrot spawns
 };
+
+// Carrots array
+const carrots = [];
 
 // Oregon Bunny Character
 const bunny = {
@@ -427,6 +432,79 @@ document.addEventListener('keyup', (e) => {
     keyPressed[e.key] = false;
 });
 
+// Carrot class
+class Carrot {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 30;
+        this.height = 35;
+        this.collected = false;
+        this.bobOffset = Math.random() * Math.PI * 2; // Random starting position for bobbing
+    }
+    
+    update() {
+        // Move left with the game speed
+        this.x -= game.speed;
+        
+        // Gentle bobbing motion
+        this.y += Math.sin(Date.now() * 0.003 + this.bobOffset) * 0.5;
+    }
+    
+    draw() {
+        ctx.save();
+        
+        // Carrot body (orange triangle)
+        ctx.fillStyle = '#FF6B35';
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width/2, this.y + this.height);
+        ctx.lineTo(this.x + 5, this.y + 10);
+        ctx.lineTo(this.x + this.width - 5, this.y + 10);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Carrot top (wider part)
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width/2, this.y + 10, this.width/2 - 2, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Carrot lines
+        ctx.strokeStyle = '#E55100';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 10, this.y + 15);
+        ctx.lineTo(this.x + 12, this.y + 25);
+        ctx.moveTo(this.x + 20, this.y + 15);
+        ctx.lineTo(this.x + 18, this.y + 25);
+        ctx.stroke();
+        
+        // Green leaves
+        ctx.fillStyle = '#228B22';
+        ctx.beginPath();
+        // Leaf 1
+        ctx.ellipse(this.x + this.width/2 - 5, this.y + 5, 3, 8, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        // Leaf 2
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width/2, this.y + 3, 3, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Leaf 3
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width/2 + 5, this.y + 5, 3, 8, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    checkCollision(character) {
+        // Simple box collision
+        return character.x < this.x + this.width &&
+               character.x + character.width > this.x &&
+               character.y < this.y + this.height &&
+               character.y + character.height > this.y;
+    }
+}
+
 // Draw background
 function drawBackground() {
     // Sky
@@ -488,12 +566,58 @@ function gameLoop() {
         orangeCat.update();
     }
     
+    // Decrease energy over time (hunger)
+    if (game.energy > 0) {
+        game.energy -= 0.05;
+        game.energy = Math.max(0, game.energy);
+    }
+    
+    // Spawn carrots
+    game.carrotSpawnTimer++;
+    if (game.carrotSpawnTimer >= game.carrotSpawnInterval) {
+        game.carrotSpawnTimer = 0;
+        // Random Y position in the playable area
+        const yPosition = 150 + Math.random() * 150;
+        carrots.push(new Carrot(canvas.width + 50, yPosition));
+    }
+    
+    // Update carrots
+    for (let i = carrots.length - 1; i >= 0; i--) {
+        const carrot = carrots[i];
+        carrot.update();
+        
+        // Check collision with bunny
+        if (carrot.checkCollision(bunny)) {
+            game.carrots++;
+            game.energy = Math.min(100, game.energy + 20); // Restore 20 energy
+            carrots.splice(i, 1);
+            continue;
+        }
+        
+        // Check collision with orange cat in multiplayer
+        if (game.multiplayer && orangeCat.active && carrot.checkCollision(orangeCat)) {
+            game.carrots++;
+            game.energy = Math.min(100, game.energy + 20); // Restore 20 energy
+            carrots.splice(i, 1);
+            continue;
+        }
+        
+        // Remove carrots that have gone off screen
+        if (carrot.x < -carrot.width) {
+            carrots.splice(i, 1);
+        }
+    }
+    
     // Update distance and background
     game.distance += game.speed * 0.1;
     game.backgroundX -= game.speed;
     
     // Draw everything
     drawBackground();
+    
+    // Draw carrots
+    carrots.forEach(carrot => carrot.draw());
+    
     bunny.draw();
     if (game.multiplayer) {
         orangeCat.draw();
@@ -511,6 +635,12 @@ document.getElementById('startBtn').addEventListener('click', () => {
     if (!game.running) {
         game.running = true;
         document.getElementById('startBtn').textContent = 'Pause';
+        // Reset game state for new game
+        if (game.distance === 0) {
+            game.carrots = 0;
+            game.energy = 100;
+            carrots.length = 0; // Clear all carrots
+        }
         gameLoop();
     } else {
         game.running = false;
