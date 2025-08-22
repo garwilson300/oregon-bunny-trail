@@ -13,7 +13,9 @@ const game = {
     carrotSpawnTimer: 0,
     carrotSpawnInterval: 120, // frames between carrot spawns
     fishSpawnTimer: 60, // offset fish spawning
-    fishSpawnInterval: 120
+    fishSpawnInterval: 120,
+    vehicleSpawnTimer: 0,
+    vehicleSpawnInterval: 90 // frames between vehicle spawns
 };
 
 // Player stats
@@ -30,6 +32,7 @@ const player2Stats = {
 // Items arrays
 const carrots = [];
 const fish = [];
+const vehicles = [];
 
 // Oregon Bunny Character
 const bunny = {
@@ -593,36 +596,186 @@ class Fish {
     }
 }
 
+// Vehicle classes
+class Vehicle {
+    constructor(x, y, lane, type) {
+        this.x = x;
+        this.y = y;
+        this.lane = lane; // 0-3 (top to bottom)
+        this.type = type; // 'car', 'truck', 'semi'
+        
+        // Set dimensions based on type
+        switch(type) {
+            case 'car':
+                this.width = 40;
+                this.height = 30;
+                this.speed = 3;
+                this.color = this.randomCarColor();
+                break;
+            case 'truck':
+                this.width = 50;
+                this.height = 35;
+                this.speed = 2.5;
+                this.color = '#8B4513'; // Brown
+                break;
+            case 'semi':
+                this.width = 70;
+                this.height = 40;
+                this.speed = 2;
+                this.color = '#4169E1'; // Royal blue
+                break;
+        }
+        
+        // Top 2 lanes go right to left, bottom 2 go left to right
+        if (lane < 2) {
+            this.direction = -1; // Moving left
+        } else {
+            this.direction = 1; // Moving right
+        }
+    }
+    
+    randomCarColor() {
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    update() {
+        this.x += this.speed * this.direction;
+    }
+    
+    draw() {
+        ctx.save();
+        
+        // Vehicle body
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        
+        // Add details based on type
+        switch(this.type) {
+            case 'car':
+                // Windows
+                ctx.fillStyle = '#87CEEB';
+                ctx.fillRect(this.x + 10, this.y + 5, 8, 10);
+                ctx.fillRect(this.x + 22, this.y + 5, 8, 10);
+                // Wheels
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(this.x + 8, this.y + this.height, 4, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width - 8, this.y + this.height, 4, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'truck':
+                // Cab window
+                ctx.fillStyle = '#87CEEB';
+                if (this.direction > 0) {
+                    ctx.fillRect(this.x + this.width - 15, this.y + 5, 10, 12);
+                } else {
+                    ctx.fillRect(this.x + 5, this.y + 5, 10, 12);
+                }
+                // Cargo area
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(this.x + 5, this.y + 5, this.width - 20, this.height - 10);
+                // Wheels
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(this.x + 10, this.y + this.height, 5, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width - 10, this.y + this.height, 5, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'semi':
+                // Cab
+                ctx.fillStyle = '#1E3A8A';
+                if (this.direction > 0) {
+                    ctx.fillRect(this.x + this.width - 20, this.y, 20, this.height);
+                    // Cab window
+                    ctx.fillStyle = '#87CEEB';
+                    ctx.fillRect(this.x + this.width - 15, this.y + 5, 10, 15);
+                } else {
+                    ctx.fillRect(this.x, this.y, 20, this.height);
+                    // Cab window
+                    ctx.fillStyle = '#87CEEB';
+                    ctx.fillRect(this.x + 5, this.y + 5, 10, 15);
+                }
+                // Trailer
+                ctx.fillStyle = '#C0C0C0';
+                ctx.fillRect(this.x + (this.direction > 0 ? 0 : 20), this.y + 2, this.width - 20, this.height - 4);
+                // Wheels
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(this.x + 10, this.y + this.height, 5, 0, Math.PI * 2);
+                ctx.arc(this.x + 25, this.y + this.height, 5, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width - 25, this.y + this.height, 5, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width - 10, this.y + this.height, 5, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+        }
+        
+        ctx.restore();
+    }
+    
+    checkCollision(character) {
+        return character.x < this.x + this.width &&
+               character.x + character.width > this.x &&
+               character.y < this.y + this.height &&
+               character.y + character.height > this.y;
+    }
+}
+
+// Lane positions (Y coordinates for 4 lanes)
+const LANE_Y = [150, 200, 250, 300];
+
 // Draw background
 function drawBackground() {
     // Sky
     ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, 250);
+    ctx.fillRect(0, 0, canvas.width, 150);
     
-    // Ground
+    // Grass area before road
     ctx.fillStyle = '#8FBC8F';
-    ctx.fillRect(0, 250, canvas.width, 150);
+    ctx.fillRect(0, 100, canvas.width, 50);
     
     // Simple moving clouds
     ctx.fillStyle = 'white';
     for (let i = 0; i < 3; i++) {
         const cloudX = (game.backgroundX + i * 300) % (canvas.width + 100) - 100;
-        drawCloud(cloudX, 50 + i * 30);
+        drawCloud(cloudX, 30 + i * 20);
     }
     
-    // Road
+    // 4-lane highway
     ctx.fillStyle = '#696969';
-    ctx.fillRect(0, 340, canvas.width, 60);
+    ctx.fillRect(0, 150, canvas.width, 200);
     
-    // Road lines
+    // Lane dividers
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([20, 10]);
+    
+    // Lane lines (3 dividers for 4 lanes)
+    for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 150 + i * 50);
+        ctx.lineTo(canvas.width, 150 + i * 50);
+        ctx.stroke();
+    }
+    
+    // Center divider (double yellow line)
     ctx.strokeStyle = 'yellow';
     ctx.lineWidth = 3;
-    ctx.setLineDash([20, 20]);
-    ctx.beginPath();
-    ctx.moveTo(0, 370);
-    ctx.lineTo(canvas.width, 370);
-    ctx.stroke();
     ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(0, 248);
+    ctx.lineTo(canvas.width, 248);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, 252);
+    ctx.lineTo(canvas.width, 252);
+    ctx.stroke();
+    
+    // Grass area after road
+    ctx.fillStyle = '#8FBC8F';
+    ctx.fillRect(0, 350, canvas.width, 50);
 }
 
 // Draw cloud helper
@@ -694,6 +847,32 @@ function gameLoop() {
         }
     }
     
+    // Spawn vehicles
+    game.vehicleSpawnTimer++;
+    if (game.vehicleSpawnTimer >= game.vehicleSpawnInterval) {
+        game.vehicleSpawnTimer = 0;
+        
+        // Random lane (0-3)
+        const lane = Math.floor(Math.random() * 4);
+        
+        // Random vehicle type
+        const types = ['car', 'car', 'truck', 'semi']; // More cars than trucks/semis
+        const type = types[Math.floor(Math.random() * types.length)];
+        
+        // Create vehicle at appropriate starting position
+        let startX;
+        if (lane < 2) {
+            // Top lanes (0,1) move right to left, start from right
+            startX = canvas.width + 20;
+        } else {
+            // Bottom lanes (2,3) move left to right, start from left
+            startX = -80;
+        }
+        
+        const vehicle = new Vehicle(startX, LANE_Y[lane] + 10, lane, type);
+        vehicles.push(vehicle);
+    }
+    
     // Update carrots
     for (let i = carrots.length - 1; i >= 0; i--) {
         const carrot = carrots[i];
@@ -734,12 +913,49 @@ function gameLoop() {
         }
     }
     
+    // Update vehicles
+    for (let i = vehicles.length - 1; i >= 0; i--) {
+        const vehicle = vehicles[i];
+        vehicle.update();
+        
+        // Check collision with bunny
+        if (vehicle.checkCollision(bunny)) {
+            // Reset bunny position
+            bunny.x = 100;
+            bunny.y = 250;
+            bunny.targetX = bunny.x;
+            bunny.targetY = bunny.y;
+            // Lose some energy on collision
+            player1Stats.energy = Math.max(0, player1Stats.energy - 25);
+        }
+        
+        // Check collision with orange cat in multiplayer
+        if (game.multiplayer && orangeCat.active && vehicle.checkCollision(orangeCat)) {
+            // Reset orange cat position
+            orangeCat.x = 100;
+            orangeCat.y = 200;
+            orangeCat.targetX = orangeCat.x;
+            orangeCat.targetY = orangeCat.y;
+            // Lose some energy on collision
+            player2Stats.energy = Math.max(0, player2Stats.energy - 25);
+        }
+        
+        // Remove vehicles that have gone off screen
+        if ((vehicle.direction < 0 && vehicle.x < -vehicle.width - 50) ||
+            (vehicle.direction > 0 && vehicle.x > canvas.width + 50)) {
+            vehicles.splice(i, 1);
+        }
+    }
+    
     // Update distance and background
     game.distance += game.speed * 0.1;
     game.backgroundX -= game.speed;
     
     // Draw everything
     drawBackground();
+    
+    // Draw vehicles
+    vehicles.forEach(vehicle => vehicle.draw());
     
     // Draw carrots
     carrots.forEach(carrot => carrot.draw());
@@ -774,6 +990,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
             player2Stats.energy = 100;
             carrots.length = 0; // Clear all carrots
             fish.length = 0; // Clear all fish
+            vehicles.length = 0; // Clear all vehicles
         }
         gameLoop();
     } else {
