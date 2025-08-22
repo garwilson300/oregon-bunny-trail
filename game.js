@@ -5,6 +5,7 @@ const ctx = canvas.getContext('2d');
 // Game State
 const game = {
     running: false,
+    gameOver: false,
     distance: 0,
     speed: 2,
     gravity: 0.5,
@@ -394,48 +395,48 @@ const orangeCat = {
 let keyPressed = {};
 
 document.addEventListener('keydown', (e) => {
-    if (!keyPressed[e.key] && game.running) {
+    if (!keyPressed[e.key] && game.running && !game.gameOver) {
         keyPressed[e.key] = true;
         
         switch(e.key) {
             case 'ArrowUp':
                 e.preventDefault();
-                bunny.hop('up');
+                if (player1Stats.energy > 0) bunny.hop('up');
                 break;
             case 'ArrowDown':
                 e.preventDefault();
-                bunny.hop('down');
+                if (player1Stats.energy > 0) bunny.hop('down');
                 break;
             case 'ArrowLeft':
                 e.preventDefault();
-                bunny.hop('left');
+                if (player1Stats.energy > 0) bunny.hop('left');
                 break;
             case 'ArrowRight':
                 e.preventDefault();
-                bunny.hop('right');
+                if (player1Stats.energy > 0) bunny.hop('right');
                 break;
             // WASD controls for Orange Cat (Player 2)
             case 'w':
             case 'W':
-                if (game.multiplayer && orangeCat.active) {
+                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
                     orangeCat.hop('up');
                 }
                 break;
             case 's':
             case 'S':
-                if (game.multiplayer && orangeCat.active) {
+                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
                     orangeCat.hop('down');
                 }
                 break;
             case 'a':
             case 'A':
-                if (game.multiplayer && orangeCat.active) {
+                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
                     orangeCat.hop('left');
                 }
                 break;
             case 'd':
             case 'D':
-                if (game.multiplayer && orangeCat.active) {
+                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
                     orangeCat.hop('right');
                 }
                 break;
@@ -787,6 +788,46 @@ function drawCloud(x, y) {
     ctx.fill();
 }
 
+// Draw game over screen
+function drawGameOver() {
+    // Semi-transparent overlay
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Game over text
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Fredoka';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    if (game.multiplayer) {
+        // Check which player(s) ran out of energy
+        if (player1Stats.energy <= 0 && player2Stats.energy <= 0) {
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.font = '24px Fredoka';
+            ctx.fillText('Both players ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
+        } else if (player1Stats.energy <= 0) {
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.font = '24px Fredoka';
+            ctx.fillText('Oregon Bunny ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
+            ctx.fillText('Orange Cat wins!', canvas.width / 2, canvas.height / 2 + 40);
+        } else if (player2Stats.energy <= 0) {
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.font = '24px Fredoka';
+            ctx.fillText('Orange Cat ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
+            ctx.fillText('Oregon Bunny wins!', canvas.width / 2, canvas.height / 2 + 40);
+        }
+    } else {
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+        ctx.font = '24px Fredoka';
+        ctx.fillText('Oregon Bunny ran out of energy!', canvas.width / 2, canvas.height / 2 + 10);
+    }
+    
+    // Restart instruction
+    ctx.font = '20px Fredoka';
+    ctx.fillText('Click "Start Adventure" to play again', canvas.width / 2, canvas.height / 2 + 80);
+}
+
 // Update game stats display
 function updateStats() {
     if (game.multiplayer) {
@@ -826,6 +867,19 @@ function gameLoop() {
     if (game.multiplayer && player2Stats.energy > 0) {
         player2Stats.energy -= 0.05;
         player2Stats.energy = Math.max(0, player2Stats.energy);
+    }
+    
+    // Check for game over
+    if (game.multiplayer) {
+        if (player1Stats.energy <= 0 && player2Stats.energy <= 0) {
+            game.gameOver = true;
+            game.running = false;
+        }
+    } else {
+        if (player1Stats.energy <= 0) {
+            game.gameOver = true;
+            game.running = false;
+        }
     }
     
     // Spawn carrots
@@ -973,13 +1027,41 @@ function gameLoop() {
     // Update UI
     updateStats();
     
+    // Draw game over message if needed
+    if (game.gameOver) {
+        drawGameOver();
+    }
+    
     // Continue loop
     requestAnimationFrame(gameLoop);
 }
 
 // Start game
 document.getElementById('startBtn').addEventListener('click', () => {
-    if (!game.running) {
+    if (!game.running || game.gameOver) {
+        // If game over, reset everything
+        if (game.gameOver) {
+            game.gameOver = false;
+            game.distance = 0;
+            game.backgroundX = 0;
+            player1Stats.carrots = 0;
+            player1Stats.energy = 100;
+            player2Stats.fish = 0;
+            player2Stats.energy = 100;
+            carrots.length = 0;
+            fish.length = 0;
+            vehicles.length = 0;
+            // Reset character positions
+            bunny.x = 100;
+            bunny.y = 250;
+            bunny.targetX = bunny.x;
+            bunny.targetY = bunny.y;
+            orangeCat.x = 100;
+            orangeCat.y = 200;
+            orangeCat.targetX = orangeCat.x;
+            orangeCat.targetY = orangeCat.y;
+        }
+        
         game.running = true;
         document.getElementById('startBtn').textContent = 'Pause';
         // Reset game state for new game
