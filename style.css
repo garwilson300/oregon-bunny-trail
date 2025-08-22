@@ -51,6 +51,23 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.multiplayer-stats {
+    flex-direction: column;
+    gap: 15px;
+}
+
+.player-stats {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.player-label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 100px;
+}
+
 #gameCanvas {
     border: 3px solid #5a9fd4;
     border-radius: 10px;

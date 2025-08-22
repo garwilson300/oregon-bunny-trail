@@ -6,18 +6,30 @@ const ctx = canvas.getContext('2d');
 const game = {
     running: false,
     distance: 0,
-    carrots: 0,
-    energy: 100,
     speed: 2,
     gravity: 0.5,
     backgroundX: 0,
     multiplayer: false,
     carrotSpawnTimer: 0,
-    carrotSpawnInterval: 120 // frames between carrot spawns
+    carrotSpawnInterval: 120, // frames between carrot spawns
+    fishSpawnTimer: 60, // offset fish spawning
+    fishSpawnInterval: 120
 };
 
-// Carrots array
+// Player stats
+const player1Stats = {
+    carrots: 0,
+    energy: 100
+};
+
+const player2Stats = {
+    fish: 0,
+    energy: 100
+};
+
+// Items arrays
 const carrots = [];
+const fish = [];
 
 // Oregon Bunny Character
 const bunny = {
@@ -505,6 +517,82 @@ class Carrot {
     }
 }
 
+// Fish class
+class Fish {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 35;
+        this.height = 25;
+        this.collected = false;
+        this.swimOffset = Math.random() * Math.PI * 2;
+    }
+    
+    update() {
+        // Move left with the game speed
+        this.x -= game.speed;
+        
+        // Swimming motion
+        this.y += Math.sin(Date.now() * 0.004 + this.swimOffset) * 0.8;
+    }
+    
+    draw() {
+        ctx.save();
+        
+        // Fish body
+        ctx.fillStyle = '#4682B4';
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2.5, this.height/2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Fish tail
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width - 10, this.y + this.height/2);
+        ctx.lineTo(this.x + this.width, this.y + 5);
+        ctx.lineTo(this.x + this.width, this.y + this.height - 5);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Fish scales pattern
+        ctx.strokeStyle = '#5F9EA0';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.arc(this.x + 10 + i * 6, this.y + this.height/2, 3, 0, Math.PI);
+            ctx.stroke();
+        }
+        
+        // Fish eye
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(this.x + 8, this.y + this.height/2 - 3, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.x + 8, this.y + this.height/2 - 3, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Fish fin
+        ctx.fillStyle = '#4682B4';
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width/2, this.y);
+        ctx.lineTo(this.x + this.width/2 - 5, this.y - 5);
+        ctx.lineTo(this.x + this.width/2 + 5, this.y - 5);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    checkCollision(character) {
+        return character.x < this.x + this.width &&
+               character.x + character.width > this.x &&
+               character.y < this.y + this.height &&
+               character.y + character.height > this.y;
+    }
+}
+
 // Draw background
 function drawBackground() {
     // Sky
@@ -548,9 +636,19 @@ function drawCloud(x, y) {
 
 // Update game stats display
 function updateStats() {
-    document.getElementById('distance').textContent = Math.floor(game.distance);
-    document.getElementById('carrots').textContent = game.carrots;
-    document.getElementById('energy').textContent = game.energy;
+    if (game.multiplayer) {
+        // Multiplayer stats
+        document.getElementById('mp-distance').textContent = Math.floor(game.distance);
+        document.getElementById('p1-carrots').textContent = player1Stats.carrots;
+        document.getElementById('p1-energy').textContent = Math.floor(player1Stats.energy);
+        document.getElementById('p2-fish').textContent = player2Stats.fish;
+        document.getElementById('p2-energy').textContent = Math.floor(player2Stats.energy);
+    } else {
+        // Single player stats
+        document.getElementById('distance').textContent = Math.floor(game.distance);
+        document.getElementById('carrots').textContent = player1Stats.carrots;
+        document.getElementById('energy').textContent = Math.floor(player1Stats.energy);
+    }
 }
 
 // Game loop
@@ -567,9 +665,14 @@ function gameLoop() {
     }
     
     // Decrease energy over time (hunger)
-    if (game.energy > 0) {
-        game.energy -= 0.05;
-        game.energy = Math.max(0, game.energy);
+    if (player1Stats.energy > 0) {
+        player1Stats.energy -= 0.05;
+        player1Stats.energy = Math.max(0, player1Stats.energy);
+    }
+    
+    if (game.multiplayer && player2Stats.energy > 0) {
+        player2Stats.energy -= 0.05;
+        player2Stats.energy = Math.max(0, player2Stats.energy);
     }
     
     // Spawn carrots
@@ -581,23 +684,25 @@ function gameLoop() {
         carrots.push(new Carrot(canvas.width + 50, yPosition));
     }
     
+    // Spawn fish (only in multiplayer)
+    if (game.multiplayer) {
+        game.fishSpawnTimer++;
+        if (game.fishSpawnTimer >= game.fishSpawnInterval) {
+            game.fishSpawnTimer = 0;
+            const yPosition = 150 + Math.random() * 150;
+            fish.push(new Fish(canvas.width + 50, yPosition));
+        }
+    }
+    
     // Update carrots
     for (let i = carrots.length - 1; i >= 0; i--) {
         const carrot = carrots[i];
         carrot.update();
         
-        // Check collision with bunny
+        // Only bunny can collect carrots
         if (carrot.checkCollision(bunny)) {
-            game.carrots++;
-            game.energy = Math.min(100, game.energy + 20); // Restore 20 energy
-            carrots.splice(i, 1);
-            continue;
-        }
-        
-        // Check collision with orange cat in multiplayer
-        if (game.multiplayer && orangeCat.active && carrot.checkCollision(orangeCat)) {
-            game.carrots++;
-            game.energy = Math.min(100, game.energy + 20); // Restore 20 energy
+            player1Stats.carrots++;
+            player1Stats.energy = Math.min(100, player1Stats.energy + 20); // Restore 20 energy
             carrots.splice(i, 1);
             continue;
         }
@@ -605,6 +710,27 @@ function gameLoop() {
         // Remove carrots that have gone off screen
         if (carrot.x < -carrot.width) {
             carrots.splice(i, 1);
+        }
+    }
+    
+    // Update fish (only in multiplayer)
+    if (game.multiplayer) {
+        for (let i = fish.length - 1; i >= 0; i--) {
+            const fishItem = fish[i];
+            fishItem.update();
+            
+            // Only orange cat can collect fish
+            if (orangeCat.active && fishItem.checkCollision(orangeCat)) {
+                player2Stats.fish++;
+                player2Stats.energy = Math.min(100, player2Stats.energy + 20); // Restore 20 energy
+                fish.splice(i, 1);
+                continue;
+            }
+            
+            // Remove fish that have gone off screen
+            if (fishItem.x < -fishItem.width) {
+                fish.splice(i, 1);
+            }
         }
     }
     
@@ -617,6 +743,11 @@ function gameLoop() {
     
     // Draw carrots
     carrots.forEach(carrot => carrot.draw());
+    
+    // Draw fish (only in multiplayer)
+    if (game.multiplayer) {
+        fish.forEach(fishItem => fishItem.draw());
+    }
     
     bunny.draw();
     if (game.multiplayer) {
@@ -637,9 +768,12 @@ document.getElementById('startBtn').addEventListener('click', () => {
         document.getElementById('startBtn').textContent = 'Pause';
         // Reset game state for new game
         if (game.distance === 0) {
-            game.carrots = 0;
-            game.energy = 100;
+            player1Stats.carrots = 0;
+            player1Stats.energy = 100;
+            player2Stats.fish = 0;
+            player2Stats.energy = 100;
             carrots.length = 0; // Clear all carrots
+            fish.length = 0; // Clear all fish
         }
         gameLoop();
     } else {
@@ -655,19 +789,35 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     
     const btn = document.getElementById('multiplayerBtn');
     const instructions = document.getElementById('instructionText');
+    const singleStats = document.getElementById('singlePlayerStats');
+    const multiStats = document.getElementById('multiplayerStats');
     
     if (game.multiplayer) {
         btn.textContent = 'Two Players';
         instructions.innerHTML = 'Player 1 (Bunny): Arrow keys ↑ ↓ ← → | Player 2 (Cat): WASD keys';
+        // Show multiplayer stats, hide single player stats
+        singleStats.style.display = 'none';
+        multiStats.style.display = 'flex';
         // Reset Orange Cat position
         orangeCat.x = 100;
         orangeCat.y = 200;
         orangeCat.targetX = orangeCat.x;
         orangeCat.targetY = orangeCat.y;
+        // Reset player 2 stats
+        player2Stats.fish = 0;
+        player2Stats.energy = 100;
     } else {
         btn.textContent = 'Single Player';
         instructions.innerHTML = 'Help Oregon Bunny hop to Oregon! Use arrow keys ↑ ↓ ← → to hop in any direction';
+        // Show single player stats, hide multiplayer stats
+        singleStats.style.display = 'flex';
+        multiStats.style.display = 'none';
+        // Clear fish array when switching to single player
+        fish.length = 0;
     }
+    
+    // Update stats display
+    updateStats();
     
     // Redraw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
