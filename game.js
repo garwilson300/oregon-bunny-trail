@@ -379,15 +379,19 @@ document.addEventListener('keydown', (e) => {
         
         switch(e.key) {
             case 'ArrowUp':
+                e.preventDefault();
                 bunny.hop('up');
                 break;
             case 'ArrowDown':
+                e.preventDefault();
                 bunny.hop('down');
                 break;
             case 'ArrowLeft':
+                e.preventDefault();
                 bunny.hop('left');
                 break;
             case 'ArrowRight':
+                e.preventDefault();
                 bunny.hop('right');
                 break;
             // WASD controls for Orange Cat (Player 2)
