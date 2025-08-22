@@ -1092,6 +1092,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     const instructions = document.getElementById('instructionText');
     const singleStats = document.getElementById('singlePlayerStats');
     const multiStats = document.getElementById('multiplayerStats');
+    const player2Controls = document.querySelector('.player2-controls');
     
     if (game.multiplayer) {
         btn.textContent = 'Two Players';
@@ -1099,6 +1100,8 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
         // Show multiplayer stats, hide single player stats
         singleStats.style.display = 'none';
         multiStats.style.display = 'flex';
+        // Show player 2 mobile controls
+        if (player2Controls) player2Controls.style.display = 'block';
         // Reset Orange Cat position
         orangeCat.x = 100;
         orangeCat.y = 210;
@@ -1113,6 +1116,8 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
         // Show single player stats, hide multiplayer stats
         singleStats.style.display = 'flex';
         multiStats.style.display = 'none';
+        // Hide player 2 mobile controls
+        if (player2Controls) player2Controls.style.display = 'none';
         // Clear fish array when switching to single player
         fish.length = 0;
     }
@@ -1132,3 +1137,37 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
 // Initial draw
 drawBackground();
 bunny.draw();
+
+// Mobile controls
+const mobileButtons = document.querySelectorAll('.dpad-btn');
+mobileButtons.forEach(btn => {
+    // Touch start (or mouse down for testing)
+    btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const player = btn.dataset.player;
+        const direction = btn.dataset.direction;
+        
+        if (game.running && !game.gameOver) {
+            if (player === '1' && player1Stats.energy > 0) {
+                bunny.hop(direction);
+            } else if (player === '2' && game.multiplayer && player2Stats.energy > 0) {
+                orangeCat.hop(direction);
+            }
+        }
+    });
+    
+    // Also add click for desktop testing
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const player = btn.dataset.player;
+        const direction = btn.dataset.direction;
+        
+        if (game.running && !game.gameOver) {
+            if (player === '1' && player1Stats.energy > 0) {
+                bunny.hop(direction);
+            } else if (player === '2' && game.multiplayer && player2Stats.energy > 0) {
+                orangeCat.hop(direction);
+            }
+        }
+    });
+});

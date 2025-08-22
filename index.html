@@ -33,6 +33,31 @@
         
         <canvas id="gameCanvas" width="800" height="400"></canvas>
         
+        <div class="mobile-controls">
+            <div class="player1-controls">
+                <div class="control-label">P1: Bunny</div>
+                <div class="dpad">
+                    <button class="dpad-btn up" data-player="1" data-direction="up">↑</button>
+                    <div class="dpad-middle">
+                        <button class="dpad-btn left" data-player="1" data-direction="left">←</button>
+                        <button class="dpad-btn right" data-player="1" data-direction="right">→</button>
+                    </div>
+                    <button class="dpad-btn down" data-player="1" data-direction="down">↓</button>
+                </div>
+            </div>
+            <div class="player2-controls" style="display: none;">
+                <div class="control-label">P2: Cat</div>
+                <div class="dpad">
+                    <button class="dpad-btn up" data-player="2" data-direction="up">↑</button>
+                    <div class="dpad-middle">
+                        <button class="dpad-btn left" data-player="2" data-direction="left">←</button>
+                        <button class="dpad-btn right" data-player="2" data-direction="right">→</button>
+                    </div>
+                    <button class="dpad-btn down" data-player="2" data-direction="down">↓</button>
+                </div>
+            </div>
+        </div>
+        
         <div class="game-controls">
             <button id="startBtn" class="btn">Start Adventure</button>
             <button id="multiplayerBtn" class="btn">Single Player</button>
