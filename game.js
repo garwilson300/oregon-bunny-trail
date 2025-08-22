@@ -1134,7 +1134,39 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     }
 });
 
-// Initial draw
+// Canvas resizing
+function resizeCanvas() {
+    const gameArea = document.querySelector('.game-area');
+    const container = document.querySelector('.game-container');
+    
+    // Get available space
+    const availableWidth = gameArea.offsetWidth - 40; // Account for padding
+    const availableHeight = window.innerHeight - 300; // Account for header, controls, padding
+    
+    // Calculate scale to maintain aspect ratio (2:1)
+    const targetAspectRatio = 2; // 800/400
+    let newWidth, newHeight;
+    
+    if (availableWidth / availableHeight > targetAspectRatio) {
+        // Height is limiting factor
+        newHeight = availableHeight;
+        newWidth = newHeight * targetAspectRatio;
+    } else {
+        // Width is limiting factor
+        newWidth = availableWidth;
+        newHeight = newWidth / targetAspectRatio;
+    }
+    
+    // Update canvas display size (CSS)
+    canvas.style.width = newWidth + 'px';
+    canvas.style.height = newHeight + 'px';
+}
+
+// Handle window resize
+window.addEventListener('resize', resizeCanvas);
+
+// Initial setup
+resizeCanvas();
 drawBackground();
 bunny.draw();
 
