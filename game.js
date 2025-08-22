@@ -29,9 +29,12 @@ const bunny = {
         // Save context state
         ctx.save();
         
-        // Animate ears while moving
-        if (Math.abs(this.velocityY) > 0.5 || keys['ArrowLeft'] || keys['ArrowRight']) {
-            this.earAngle = Math.sin(Date.now() * 0.005) * 0.2;
+        // Animate ears while hopping
+        const isMoving = (this.targetX !== undefined && Math.abs(this.targetX - this.x) > 1) ||
+                        (this.targetY !== undefined && Math.abs(this.targetY - this.y) > 1);
+        
+        if (isMoving || this.jumping) {
+            this.earAngle = Math.sin(Date.now() * 0.01) * 0.3;
         } else {
             this.earAngle *= 0.9; // Gradually return to rest
         }
@@ -106,60 +109,87 @@ const bunny = {
     },
     
     update() {
-        // Apply gravity
-        this.velocityY += game.gravity;
-        this.y += this.velocityY;
+        // No gravity for Frogger-style movement
+        // Smooth transition to target position
+        if (this.targetX !== undefined) {
+            const dx = this.targetX - this.x;
+            if (Math.abs(dx) > 1) {
+                this.x += dx * 0.3; // Smooth hopping motion
+            } else {
+                this.x = this.targetX;
+            }
+        }
         
-        // Ground collision (simple ground at y = 300)
-        if (this.y > 300) {
-            this.y = 300;
-            this.velocityY = 0;
-            this.jumping = false;
+        if (this.targetY !== undefined) {
+            const dy = this.targetY - this.y;
+            if (Math.abs(dy) > 1) {
+                this.y += dy * 0.3; // Smooth hopping motion
+            } else {
+                this.y = this.targetY;
+                this.jumping = false;
+            }
         }
     },
     
-    jump() {
-        if (!this.jumping) {
-            this.velocityY = -12;
-            this.jumping = true;
-        }
-    },
-    
-    moveLeft() {
-        if (this.x > 0) {
-            this.x -= 5;
-        }
-    },
-    
-    moveRight() {
-        if (this.x < canvas.width - this.width) {
-            this.x += 5;
+    hop(direction) {
+        const hopDistance = 50; // Grid-based hop distance
+        
+        switch(direction) {
+            case 'up':
+                if (this.y > 100 && !this.jumping) {
+                    this.targetY = this.y - hopDistance;
+                    this.jumping = true;
+                }
+                break;
+            case 'down':
+                if (this.y < 300 && !this.jumping) {
+                    this.targetY = this.y + hopDistance;
+                    this.jumping = true;
+                }
+                break;
+            case 'left':
+                if (this.x > 0 && !this.jumping) {
+                    this.targetX = Math.max(0, this.x - hopDistance);
+                    this.jumping = true;
+                }
+                break;
+            case 'right':
+                if (this.x < canvas.width - this.width && !this.jumping) {
+                    this.targetX = Math.min(canvas.width - this.width, this.x + hopDistance);
+                    this.jumping = true;
+                }
+                break;
         }
     }
 };
 
-// Keyboard controls
-const keys = {};
+// Keyboard controls - Frogger style (one hop per keypress)
+let keyPressed = {};
+
 document.addEventListener('keydown', (e) => {
-    keys[e.key] = true;
+    if (!keyPressed[e.key] && game.running) {
+        keyPressed[e.key] = true;
+        
+        switch(e.key) {
+            case 'ArrowUp':
+                bunny.hop('up');
+                break;
+            case 'ArrowDown':
+                bunny.hop('down');
+                break;
+            case 'ArrowLeft':
+                bunny.hop('left');
+                break;
+            case 'ArrowRight':
+                bunny.hop('right');
+                break;
+        }
+    }
 });
 
 document.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
+    keyPressed[e.key] = false;
 });
-
-// Handle controls
-function handleControls() {
-    if (keys['ArrowLeft']) {
-        bunny.moveLeft();
-    }
-    if (keys['ArrowRight']) {
-        bunny.moveRight();
-    }
-    if (keys[' '] || keys['ArrowUp']) {
-        bunny.jump();
-    }
-}
 
 // Draw background
 function drawBackground() {
@@ -217,7 +247,6 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Update game
-    handleControls();
     bunny.update();
     
     // Update distance and background
