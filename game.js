@@ -1171,15 +1171,19 @@ document.getElementById('startBtn').addEventListener('click', () => {
             carrots.length = 0;
             fish.length = 0;
             vehicles.length = 0;
-            // Reset character positions
+            // Reset character positions and states
             bunny.x = 100;
             bunny.y = 260;
             bunny.targetX = bunny.x;
             bunny.targetY = bunny.y;
+            bunny.invulnerable = false;
+            bunny.invulnerableTimer = 0;
             orangeCat.x = 100;
             orangeCat.y = 210;
             orangeCat.targetX = orangeCat.x;
             orangeCat.targetY = orangeCat.y;
+            orangeCat.invulnerable = false;
+            orangeCat.invulnerableTimer = 0;
         }
         
         game.running = true;
