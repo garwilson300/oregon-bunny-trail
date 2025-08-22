@@ -21,61 +21,85 @@ const bunny = {
     height: 60,
     velocityY: 0,
     jumping: false,
-    color: '#8B4513', // Brown bunny
-    earColor: '#FFB6C1', // Pink inner ears
+    color: '#D8BFD8', // Light lavender purple like Oregon Bunny
+    earColor: '#E6D6E6', // Even lighter purple for inner ears
+    earAngle: 0, // For floppy ear animation
     
     draw() {
         // Save context state
         ctx.save();
         
-        // Bunny body
+        // Animate ears while moving
+        if (Math.abs(this.velocityY) > 0.5 || keys['ArrowLeft'] || keys['ArrowRight']) {
+            this.earAngle = Math.sin(Date.now() * 0.005) * 0.2;
+        } else {
+            this.earAngle *= 0.9; // Gradually return to rest
+        }
+        
+        // Bunny body (round and fluffy)
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2, this.height/2, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2, this.height/2.2, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Bunny head
+        // Bunny head (rounder to match Oregon Bunny)
         ctx.beginPath();
-        ctx.arc(this.x + this.width/2, this.y + 20, 20, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width/2, this.y + 18, 22, 0, Math.PI * 2);
         ctx.fill();
         
-        // Ears
+        // Long floppy ears
         ctx.fillStyle = this.color;
+        // Left ear
+        ctx.save();
+        ctx.translate(this.x + 18, this.y + 5);
+        ctx.rotate(-0.5 + this.earAngle);
         ctx.beginPath();
-        ctx.ellipse(this.x + 15, this.y - 5, 8, 20, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(0, -15, 10, 25, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(this.x + 35, this.y - 5, 8, 20, 0.2, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Inner ears
+        // Inner left ear
         ctx.fillStyle = this.earColor;
         ctx.beginPath();
-        ctx.ellipse(this.x + 15, this.y - 5, 4, 12, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(0, -15, 5, 18, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(this.x + 35, this.y - 5, 4, 12, 0.2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.restore();
         
-        // Eyes
+        // Right ear
+        ctx.save();
+        ctx.translate(this.x + 32, this.y + 5);
+        ctx.rotate(0.5 - this.earAngle);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.ellipse(0, -15, 10, 25, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Inner right ear
+        ctx.fillStyle = this.earColor;
+        ctx.beginPath();
+        ctx.ellipse(0, -15, 5, 18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        
+        // Eyes (smaller and closer together like Oregon Bunny)
         ctx.fillStyle = 'black';
         ctx.beginPath();
-        ctx.arc(this.x + 18, this.y + 18, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + 20, this.y + 18, 2, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x + 32, this.y + 18, 3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Nose
-        ctx.fillStyle = 'pink';
-        ctx.beginPath();
-        ctx.arc(this.x + 25, this.y + 25, 2, 0, Math.PI * 2);
+        ctx.arc(this.x + 30, this.y + 18, 2, 0, Math.PI * 2);
         ctx.fill();
         
-        // Tail
-        ctx.fillStyle = 'white';
+        // Pink nose (triangular like Oregon Bunny)
+        ctx.fillStyle = '#FFB6C1';
         ctx.beginPath();
-        ctx.arc(this.x - 5, this.y + this.height/2, 8, 0, Math.PI * 2);
+        ctx.moveTo(this.x + 25, this.y + 26);
+        ctx.lineTo(this.x + 22, this.y + 23);
+        ctx.lineTo(this.x + 28, this.y + 23);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Small fluffy tail
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x - 3, this.y + this.height/2, 10, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.restore();
