@@ -75,6 +75,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Fredoka', cursive;
+    margin: 0 10px;
 }
 
 .btn:hover {

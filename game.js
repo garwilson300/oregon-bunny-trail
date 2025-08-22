@@ -10,7 +10,8 @@ const game = {
     energy: 100,
     speed: 2,
     gravity: 0.5,
-    backgroundX: 0
+    backgroundX: 0,
+    multiplayer: false
 };
 
 // Oregon Bunny Character
@@ -163,6 +164,212 @@ const bunny = {
     }
 };
 
+// Orange Cat Character (Player 2)
+const orangeCat = {
+    x: 100,
+    y: 200,
+    width: 55,
+    height: 45,
+    active: false,
+    jumping: false,
+    tailWag: 0,
+    
+    draw() {
+        if (!this.active) return;
+        
+        ctx.save();
+        
+        // Animate tail while moving
+        const isMoving = (this.targetX !== undefined && Math.abs(this.targetX - this.x) > 1) ||
+                        (this.targetY !== undefined && Math.abs(this.targetY - this.y) > 1);
+        
+        if (isMoving || this.jumping) {
+            this.tailWag = Math.sin(Date.now() * 0.01) * 0.2;
+        } else {
+            this.tailWag *= 0.9;
+        }
+        
+        // Cat tail (drawn first so it appears behind)
+        ctx.save();
+        ctx.translate(this.x - 5, this.y + this.height/2);
+        ctx.rotate(this.tailWag);
+        ctx.fillStyle = '#FF8C00';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 30, 8, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        // Tail stripes
+        ctx.fillStyle = '#D2691E';
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.ellipse(-10 + i * 10, 0, 4, 6, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+        
+        // Cat body
+        ctx.fillStyle = '#FF8C00';
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2, this.height/2.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Body stripes
+        ctx.fillStyle = '#D2691E';
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.rect(this.x + 15 + i * 12, this.y + 10, 3, this.height - 15);
+            ctx.fill();
+        }
+        
+        // Cat head
+        ctx.fillStyle = '#FF8C00';
+        ctx.beginPath();
+        ctx.arc(this.x + this.width/2, this.y + 15, 18, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Head stripes
+        ctx.fillStyle = '#D2691E';
+        ctx.beginPath();
+        ctx.arc(this.x + this.width/2 - 10, this.y + 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.x + this.width/2 + 10, this.y + 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.x + this.width/2, this.y + 5, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Cat ears (triangular)
+        ctx.fillStyle = '#FF8C00';
+        ctx.beginPath();
+        ctx.moveTo(this.x + 15, this.y + 5);
+        ctx.lineTo(this.x + 10, this.y - 5);
+        ctx.lineTo(this.x + 20, this.y);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(this.x + 35, this.y + 5);
+        ctx.lineTo(this.x + 40, this.y - 5);
+        ctx.lineTo(this.x + 30, this.y);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Inner ears
+        ctx.fillStyle = '#FFB6C1';
+        ctx.beginPath();
+        ctx.moveTo(this.x + 15, this.y + 2);
+        ctx.lineTo(this.x + 13, this.y - 2);
+        ctx.lineTo(this.x + 17, this.y);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(this.x + 35, this.y + 2);
+        ctx.lineTo(this.x + 37, this.y - 2);
+        ctx.lineTo(this.x + 33, this.y);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Green eyes
+        ctx.fillStyle = '#228B22';
+        ctx.beginPath();
+        ctx.arc(this.x + 20, this.y + 15, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.x + 30, this.y + 15, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Eye pupils
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.x + 20, this.y + 15, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.x + 30, this.y + 15, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Pink nose
+        ctx.fillStyle = '#FFB6C1';
+        ctx.beginPath();
+        ctx.moveTo(this.x + 25, this.y + 20);
+        ctx.lineTo(this.x + 22, this.y + 18);
+        ctx.lineTo(this.x + 28, this.y + 18);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Whiskers
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 10, this.y + 20);
+        ctx.lineTo(this.x, this.y + 18);
+        ctx.moveTo(this.x + 10, this.y + 22);
+        ctx.lineTo(this.x, this.y + 22);
+        ctx.moveTo(this.x + 40, this.y + 20);
+        ctx.lineTo(this.x + 50, this.y + 18);
+        ctx.moveTo(this.x + 40, this.y + 22);
+        ctx.lineTo(this.x + 50, this.y + 22);
+        ctx.stroke();
+        
+        ctx.restore();
+    },
+    
+    update() {
+        if (!this.active) return;
+        
+        // Same movement system as bunny
+        if (this.targetX !== undefined) {
+            const dx = this.targetX - this.x;
+            if (Math.abs(dx) > 1) {
+                this.x += dx * 0.3;
+            } else {
+                this.x = this.targetX;
+            }
+        }
+        
+        if (this.targetY !== undefined) {
+            const dy = this.targetY - this.y;
+            if (Math.abs(dy) > 1) {
+                this.y += dy * 0.3;
+            } else {
+                this.y = this.targetY;
+                this.jumping = false;
+            }
+        }
+    },
+    
+    hop(direction) {
+        const hopDistance = 50;
+        
+        switch(direction) {
+            case 'up':
+                if (this.y > 100 && !this.jumping) {
+                    this.targetY = this.y - hopDistance;
+                    this.jumping = true;
+                }
+                break;
+            case 'down':
+                if (this.y < 300 && !this.jumping) {
+                    this.targetY = this.y + hopDistance;
+                    this.jumping = true;
+                }
+                break;
+            case 'left':
+                if (this.x > 0 && !this.jumping) {
+                    this.targetX = Math.max(0, this.x - hopDistance);
+                    this.jumping = true;
+                }
+                break;
+            case 'right':
+                if (this.x < canvas.width - this.width && !this.jumping) {
+                    this.targetX = Math.min(canvas.width - this.width, this.x + hopDistance);
+                    this.jumping = true;
+                }
+                break;
+        }
+    }
+};
+
 // Keyboard controls - Frogger style (one hop per keypress)
 let keyPressed = {};
 
@@ -182,6 +389,31 @@ document.addEventListener('keydown', (e) => {
                 break;
             case 'ArrowRight':
                 bunny.hop('right');
+                break;
+            // WASD controls for Orange Cat (Player 2)
+            case 'w':
+            case 'W':
+                if (game.multiplayer && orangeCat.active) {
+                    orangeCat.hop('up');
+                }
+                break;
+            case 's':
+            case 'S':
+                if (game.multiplayer && orangeCat.active) {
+                    orangeCat.hop('down');
+                }
+                break;
+            case 'a':
+            case 'A':
+                if (game.multiplayer && orangeCat.active) {
+                    orangeCat.hop('left');
+                }
+                break;
+            case 'd':
+            case 'D':
+                if (game.multiplayer && orangeCat.active) {
+                    orangeCat.hop('right');
+                }
                 break;
         }
     }
@@ -248,6 +480,9 @@ function gameLoop() {
     
     // Update game
     bunny.update();
+    if (game.multiplayer) {
+        orangeCat.update();
+    }
     
     // Update distance and background
     game.distance += game.speed * 0.1;
@@ -256,6 +491,9 @@ function gameLoop() {
     // Draw everything
     drawBackground();
     bunny.draw();
+    if (game.multiplayer) {
+        orangeCat.draw();
+    }
     
     // Update UI
     updateStats();
@@ -273,6 +511,36 @@ document.getElementById('startBtn').addEventListener('click', () => {
     } else {
         game.running = false;
         document.getElementById('startBtn').textContent = 'Resume';
+    }
+});
+
+// Multiplayer toggle
+document.getElementById('multiplayerBtn').addEventListener('click', () => {
+    game.multiplayer = !game.multiplayer;
+    orangeCat.active = game.multiplayer;
+    
+    const btn = document.getElementById('multiplayerBtn');
+    const instructions = document.getElementById('instructionText');
+    
+    if (game.multiplayer) {
+        btn.textContent = 'Two Players';
+        instructions.innerHTML = 'Player 1 (Bunny): Arrow keys ↑ ↓ ← → | Player 2 (Cat): WASD keys';
+        // Reset Orange Cat position
+        orangeCat.x = 100;
+        orangeCat.y = 200;
+        orangeCat.targetX = orangeCat.x;
+        orangeCat.targetY = orangeCat.y;
+    } else {
+        btn.textContent = 'Single Player';
+        instructions.innerHTML = 'Help Oregon Bunny hop to Oregon! Use arrow keys ↑ ↓ ← → to hop in any direction';
+    }
+    
+    // Redraw
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+    bunny.draw();
+    if (game.multiplayer) {
+        orangeCat.draw();
     }
 });
 
