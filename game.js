@@ -937,14 +937,52 @@ function updateStats() {
         // Multiplayer stats
         document.getElementById('mp-distance').textContent = Math.floor(game.distance);
         document.getElementById('p1-carrots').textContent = player1Stats.carrots;
-        document.getElementById('p1-energy').textContent = Math.floor(player1Stats.energy);
+        
+        // Update player 1 energy bar
+        const p1EnergyFill = document.getElementById('p1-energy-fill');
+        if (p1EnergyFill) {
+            p1EnergyFill.style.width = Math.max(0, player1Stats.energy) + '%';
+            updateEnergyBarColor(p1EnergyFill, player1Stats.energy);
+        }
+        
         document.getElementById('p2-fish').textContent = player2Stats.fish;
-        document.getElementById('p2-energy').textContent = Math.floor(player2Stats.energy);
+        
+        // Update player 2 energy bar
+        const p2EnergyFill = document.getElementById('p2-energy-fill');
+        if (p2EnergyFill) {
+            p2EnergyFill.style.width = Math.max(0, player2Stats.energy) + '%';
+            updateEnergyBarColor(p2EnergyFill, player2Stats.energy);
+        }
     } else {
         // Single player stats
         document.getElementById('distance').textContent = Math.floor(game.distance);
         document.getElementById('carrots').textContent = player1Stats.carrots;
-        document.getElementById('energy').textContent = Math.floor(player1Stats.energy);
+        
+        // Update single player energy bar
+        const energyFill = document.getElementById('energy-fill');
+        if (energyFill) {
+            energyFill.style.width = Math.max(0, player1Stats.energy) + '%';
+            updateEnergyBarColor(energyFill, player1Stats.energy);
+        }
+    }
+}
+
+// Helper function to update energy bar colors
+function updateEnergyBarColor(element, energy) {
+    // Remove all color classes
+    element.classList.remove('critical', 'low', 'medium', 'high', 'full');
+    
+    // Add appropriate color class based on energy level
+    if (energy <= 10) {
+        element.classList.add('critical');
+    } else if (energy <= 25) {
+        element.classList.add('low');
+    } else if (energy <= 50) {
+        element.classList.add('medium');
+    } else if (energy <= 75) {
+        element.classList.add('high');
+    } else {
+        element.classList.add('full');
     }
 }
 

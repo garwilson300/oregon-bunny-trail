@@ -20,19 +20,32 @@
             <h1>Oregon Bunny Trail</h1>
             <div class="game-stats" id="singlePlayerStats">
                 <span class="stat">Distance: <span id="distance">0</span> miles</span>
-                <span class="stat">Carrots: <span id="carrots">0</span></span>
-                <span class="stat">Energy: <span id="energy">100</span>%</span>
+                <span class="stat">🥕 <span id="carrots">0</span></span>
+                <div class="energy-bar-container">
+                    <span class="energy-label">Energy</span>
+                    <div class="energy-bar">
+                        <div class="energy-fill" id="energy-fill" style="width: 100%"></div>
+                    </div>
+                </div>
             </div>
             <div class="game-stats multiplayer-stats" id="multiplayerStats" style="display: none;">
                 <div class="player-stats">
                     <span class="player-label">🐰 Bunny:</span>
-                    <span class="stat">Carrots: <span id="p1-carrots">0</span></span>
-                    <span class="stat">Energy: <span id="p1-energy">100</span>%</span>
+                    <span class="stat">🥕 <span id="p1-carrots">0</span></span>
+                    <div class="energy-bar-container small">
+                        <div class="energy-bar">
+                            <div class="energy-fill" id="p1-energy-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="player-stats">
                     <span class="player-label">🐱 Cat:</span>
-                    <span class="stat">Fish: <span id="p2-fish">0</span></span>
-                    <span class="stat">Energy: <span id="p2-energy">100</span>%</span>
+                    <span class="stat">🐟 <span id="p2-fish">0</span></span>
+                    <div class="energy-bar-container small">
+                        <div class="energy-bar">
+                            <div class="energy-fill" id="p2-energy-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
                 </div>
                 <span class="stat">Distance: <span id="mp-distance">0</span> miles</span>
             </div>

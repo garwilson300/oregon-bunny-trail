@@ -77,6 +77,80 @@ body {
     min-width: 100px;
 }
 
+/* Energy bar styles */
+.energy-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffd700;
+    padding: 8px 12px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.energy-bar-container.small {
+    padding: 5px 8px;
+}
+
+.energy-label {
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.energy-bar {
+    width: 120px;
+    height: 20px;
+    background: #333;
+    border: 2px solid #000;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.energy-bar-container.small .energy-bar {
+    width: 80px;
+    height: 15px;
+}
+
+.energy-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    background: linear-gradient(to right, 
+        #ff4444 0%, 
+        #ff6666 25%, 
+        #ffaa44 50%, 
+        #ffcc44 75%, 
+        #44ff44 100%);
+}
+
+/* Color changes based on energy level */
+.energy-fill.critical {
+    background: #ff4444;
+    animation: pulse 0.5s infinite alternate;
+}
+
+.energy-fill.low {
+    background: linear-gradient(to right, #ff4444, #ffaa44);
+}
+
+.energy-fill.medium {
+    background: linear-gradient(to right, #ffaa44, #ffcc44);
+}
+
+.energy-fill.high {
+    background: linear-gradient(to right, #ffcc44, #44ff44);
+}
+
+.energy-fill.full {
+    background: #44ff44;
+}
+
+@keyframes pulse {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+}
+
 #gameCanvas {
     border: 3px solid #5a9fd4;
     border-radius: 10px;
