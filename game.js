@@ -849,8 +849,8 @@ function updateStats() {
 function gameLoop() {
     if (!game.running) return;
     
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear canvas (use original dimensions)
+    ctx.clearRect(0, 0, 800, 400);
     
     // Update game
     bunny.update();
@@ -1134,6 +1134,9 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     }
 });
 
+// Scale factor for rendering
+let renderScale = 1;
+
 // Canvas resizing
 function resizeCanvas() {
     const gameArea = document.querySelector('.game-area');
@@ -1157,9 +1160,31 @@ function resizeCanvas() {
         newHeight = newWidth / targetAspectRatio;
     }
     
+    // Get device pixel ratio for crisp rendering
+    const dpr = window.devicePixelRatio || 1;
+    
+    // Calculate render scale based on new size vs original size
+    renderScale = newWidth / 800;
+    
+    // Set actual canvas size (accounting for device pixel ratio)
+    canvas.width = newWidth * dpr;
+    canvas.height = newHeight * dpr;
+    
+    // Scale canvas context for device pixel ratio
+    ctx.scale(dpr * renderScale, dpr * renderScale);
+    
     // Update canvas display size (CSS)
     canvas.style.width = newWidth + 'px';
     canvas.style.height = newHeight + 'px';
+    
+    // Redraw if game is not running
+    if (!game.running) {
+        drawBackground();
+        bunny.draw();
+        if (game.multiplayer) {
+            orangeCat.draw();
+        }
+    }
 }
 
 // Handle window resize
