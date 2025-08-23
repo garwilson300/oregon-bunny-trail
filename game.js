@@ -1758,9 +1758,21 @@ function resizeCanvas() {
     const container = document.querySelector('.game-container');
     
     // Get actual available space from the game-area element
-    const availableWidth = gameArea ? Math.max(gameArea.offsetWidth - 40, 400) : window.innerWidth - 40;
-    // Use the actual height of the game-area instead of fixed offset
-    const availableHeight = gameArea ? Math.max(gameArea.offsetHeight - 40, 200) : window.innerHeight - 100;
+    // Use more space on larger displays
+    let availableWidth, availableHeight;
+    
+    if (gameArea && gameArea.offsetWidth > 0) {
+        availableWidth = gameArea.offsetWidth - 40;
+        availableHeight = gameArea.offsetHeight - 40;
+    } else {
+        // Fallback to viewport dimensions
+        availableWidth = window.innerWidth * 0.8;
+        availableHeight = window.innerHeight * 0.7;
+    }
+    
+    // Ensure minimum reasonable size
+    availableWidth = Math.max(availableWidth, 400);
+    availableHeight = Math.max(availableHeight, 200);
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -1798,14 +1810,21 @@ function resizeCanvas() {
     
     // Debug logging
     console.log('Canvas resized:', {
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        gameAreaWidth: gameArea ? gameArea.offsetWidth : 'null',
+        gameAreaHeight: gameArea ? gameArea.offsetHeight : 'null',
         availableWidth,
         availableHeight,
         newWidth,
         newHeight,
         canvasWidth: canvas.width,
         canvasHeight: canvas.height,
+        displayWidth: canvas.style.width,
+        displayHeight: canvas.style.height,
         renderScale,
-        dpr
+        dpr,
+        userAgent: navigator.userAgent
     });
     
     // Redraw if game is not running
