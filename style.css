@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Press Start 2P', cursive;
-    background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 100%);
+    background: linear-gradient(to bottom, #B8E6F5 0%, #A8D5BA 50%, #7FB069 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;

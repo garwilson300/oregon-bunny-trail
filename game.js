@@ -823,68 +823,247 @@ class Vehicle {
 // Lane positions (Y coordinates for 4 lanes)
 const LANE_Y = [150, 200, 250, 300];
 
-// Draw background
+// Draw background - Totoro inspired
 function drawBackground() {
-    // Sky
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, 150);
+    // Sky gradient - soft Ghibli blue
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, 150);
+    skyGradient.addColorStop(0, '#B8E6F5');
+    skyGradient.addColorStop(1, '#E8F5E9');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, 800, 150);
     
-    // Grass area before road
-    ctx.fillStyle = '#8FBC8F';
-    ctx.fillRect(0, 100, canvas.width, 50);
+    // Rolling hills in background (multiple layers for depth)
+    // Far hills
+    ctx.fillStyle = '#A8D5BA';
+    ctx.beginPath();
+    ctx.moveTo(0, 120);
+    for (let x = 0; x <= 800; x += 50) {
+        const hillOffset = (game.backgroundX * 0.05 + x) % 800;
+        ctx.lineTo(x, 120 + Math.sin(hillOffset * 0.01) * 15);
+    }
+    ctx.lineTo(800, 150);
+    ctx.lineTo(0, 150);
+    ctx.closePath();
+    ctx.fill();
     
-    // Simple moving clouds (move slowly)
-    ctx.fillStyle = 'white';
+    // Mid hills
+    ctx.fillStyle = '#7FB069';
+    ctx.beginPath();
+    ctx.moveTo(0, 130);
+    for (let x = 0; x <= 800; x += 30) {
+        const hillOffset = (game.backgroundX * 0.08 + x) % 800;
+        ctx.lineTo(x, 130 + Math.sin(hillOffset * 0.015) * 10);
+    }
+    ctx.lineTo(800, 150);
+    ctx.lineTo(0, 150);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Totoro-style giant trees in background
+    for (let i = 0; i < 5; i++) {
+        let treeX = ((game.backgroundX * 0.3 + i * 200) % 1000) - 100;
+        if (treeX < 850 && treeX > -50) {
+            drawGhibliTree(treeX, 80, 0.5 + (i % 2) * 0.2);
+        }
+    }
+    
+    // Fluffy Totoro-style clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     for (let i = 0; i < 3; i++) {
-        // Clouds move at 1/10th the speed, same direction as background (left)
-        // Use modulo with fixed width (900) to ensure proper looping
         let cloudOffset = (game.backgroundX * 0.1 + i * 300);
         let cloudX = ((cloudOffset % 900) + 900) % 900 - 100;
-        drawCloud(cloudX, 30 + i * 20);
+        drawTotoroCloud(cloudX, 20 + i * 25);
     }
     
-    // 4-lane highway
-    ctx.fillStyle = '#696969';
-    ctx.fillRect(0, 150, canvas.width, 200);
+    // Forest path instead of highway - dirt road with grass patches
+    // Base dirt path
+    ctx.fillStyle = '#8B7355';
+    ctx.fillRect(0, 150, 800, 200);
     
-    // Lane dividers
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([20, 10]);
-    
-    // Lane lines (3 dividers for 4 lanes)
-    for (let i = 1; i < 4; i++) {
+    // Add texture to path
+    ctx.fillStyle = '#7A6449';
+    for (let i = 0; i < 20; i++) {
+        let patchX = ((game.backgroundX * 0.5 + i * 60) % 850) - 50;
         ctx.beginPath();
-        ctx.moveTo(0, 150 + i * 50);
-        ctx.lineTo(canvas.width, 150 + i * 50);
-        ctx.stroke();
+        ctx.ellipse(patchX, 180 + i * 15, 30, 10, Math.random(), 0, Math.PI * 2);
+        ctx.fill();
     }
     
-    // Center divider (double yellow line)
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([]);
-    ctx.beginPath();
-    ctx.moveTo(0, 248);
-    ctx.lineTo(canvas.width, 248);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, 252);
-    ctx.lineTo(canvas.width, 252);
-    ctx.stroke();
+    // Grass patches on the path
+    ctx.fillStyle = '#6B8E23';
+    for (let i = 0; i < 15; i++) {
+        let grassX = ((game.backgroundX * 0.7 + i * 80) % 900) - 100;
+        ctx.beginPath();
+        ctx.ellipse(grassX, 160 + i * 20, 15, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
     
-    // Grass area after road
-    ctx.fillStyle = '#8FBC8F';
-    ctx.fillRect(0, 350, canvas.width, 50);
+    // Path edges with wildflowers
+    ctx.setLineDash([]);
+    for (let side = 0; side <= 1; side++) {
+        const y = side === 0 ? 150 : 350;
+        // Grass edge
+        ctx.fillStyle = '#4A7C2E';
+        ctx.fillRect(0, y - 5, 800, 10);
+        
+        // Wildflowers
+        for (let i = 0; i < 12; i++) {
+            let flowerX = ((game.backgroundX * 0.8 + i * 70) % 850) - 50;
+            drawWildflower(flowerX, y + (side === 0 ? -8 : 8), i);
+        }
+    }
+    
+    // Lush grass area after road
+    const grassGradient = ctx.createLinearGradient(0, 350, 0, 400);
+    grassGradient.addColorStop(0, '#5D8C3A');
+    grassGradient.addColorStop(1, '#4A7C2E');
+    ctx.fillStyle = grassGradient;
+    ctx.fillRect(0, 350, 800, 50);
+    
+    // Add some soot sprites (susuwatari) occasionally
+    if (Math.random() < 0.02) {
+        drawSootSprite(Math.random() * 800, 100 + Math.random() * 250);
+    }
 }
 
-// Draw cloud helper
-function drawCloud(x, y) {
+// Draw Totoro-style fluffy cloud
+function drawTotoroCloud(x, y) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    // Make clouds extra fluffy with multiple circles
+    for (let i = 0; i < 5; i++) {
+        const offsetX = i * 15 - 10;
+        const offsetY = Math.sin(i) * 8;
+        const radius = 20 + Math.random() * 10;
+        ctx.beginPath();
+        ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+// Draw Ghibli-style giant tree
+function drawGhibliTree(x, y, scale = 1) {
+    ctx.save();
+    
+    // Tree trunk - thick and majestic
+    const trunkWidth = 40 * scale;
+    const trunkHeight = 80 * scale;
+    
+    ctx.fillStyle = '#4A3425';
+    ctx.fillRect(x - trunkWidth/2, y, trunkWidth, trunkHeight);
+    
+    // Tree roots
+    ctx.fillStyle = '#3D2B1F';
+    for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x + i * 15 * scale, y + trunkHeight);
+        ctx.lineTo(x + i * 25 * scale, y + trunkHeight + 10 * scale);
+        ctx.lineTo(x + i * 10 * scale, y + trunkHeight + 10 * scale);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    // Lush canopy - multiple layers
+    const canopyY = y - 20 * scale;
+    
+    // Dark green base
+    ctx.fillStyle = '#2D5016';
+    for (let layer = 0; layer < 3; layer++) {
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const layerRadius = (60 - layer * 15) * scale;
+            const leafX = x + Math.cos(angle) * layerRadius * 0.7;
+            const leafY = canopyY - layer * 20 * scale + Math.sin(angle) * layerRadius * 0.5;
+            ctx.beginPath();
+            ctx.arc(leafX, leafY, 25 * scale, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    // Lighter green highlights
+    ctx.fillStyle = '#5D8C3A';
+    for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const leafX = x + Math.cos(angle) * 40 * scale;
+        const leafY = canopyY - 30 * scale + Math.sin(angle) * 20 * scale;
+        ctx.beginPath();
+        ctx.arc(leafX, leafY, 20 * scale, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    ctx.restore();
+}
+
+// Draw wildflowers
+function drawWildflower(x, y, index) {
+    ctx.save();
+    
+    // Stem
+    ctx.strokeStyle = '#3A5F0B';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(x, y, 25, 0, Math.PI * 2);
-    ctx.arc(x + 25, y, 35, 0, Math.PI * 2);
-    ctx.arc(x + 50, y, 25, 0, Math.PI * 2);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - 10);
+    ctx.stroke();
+    
+    // Flower petals - vary colors
+    const colors = ['#FFB6C1', '#FFD700', '#E6E6FA', '#FFA07A', '#98FB98'];
+    ctx.fillStyle = colors[index % colors.length];
+    
+    for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const petalX = x + Math.cos(angle) * 4;
+        const petalY = y - 10 + Math.sin(angle) * 4;
+        ctx.beginPath();
+        ctx.arc(petalX, petalY, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // Center
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(x, y - 10, 2, 0, Math.PI * 2);
     ctx.fill();
+    
+    ctx.restore();
+}
+
+// Draw soot sprites (susuwatari)
+function drawSootSprite(x, y) {
+    ctx.save();
+    
+    // Fuzzy black body
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Fuzzy edges
+    for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const spikeX = x + Math.cos(angle) * 10;
+        const spikeY = y + Math.sin(angle) * 10;
+        ctx.beginPath();
+        ctx.arc(spikeX, spikeY, 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // Big white eyes
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(x - 3, y - 1, 3, 0, Math.PI * 2);
+    ctx.arc(x + 3, y - 1, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Pupils
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(x - 3, y - 1, 1, 0, Math.PI * 2);
+    ctx.arc(x + 3, y - 1, 1, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
 }
 
 // Draw game over screen
