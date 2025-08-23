@@ -1119,15 +1119,18 @@ function drawBackground() {
     ctx.fillStyle = isDarkMode() ? '#1a3a2a' : '#4A7C2E';
     ctx.fillRect(0, 145, 800, 10);
     
-    // Top wildflowers
+    // Top wildflowers - place them ON the grass strip, not above it
     if (game.flowers && game.flowers.length > 0) {
-        for (let flower of game.flowers) {
+        // Use half the flowers for top grass
+        for (let i = 0; i < Math.floor(game.flowers.length / 2); i++) {
+            const flower = game.flowers[i];
             // Scroll right to left with the background - simple modulo like trees
             let flowerX = (flower.x + game.backgroundX * 0.8) % 2000;
             if (flowerX < 0) flowerX += 2000;
             
             if (flowerX > -20 && flowerX < 820) {
-                const yPos = 142 + (flower.yOffset || 0);
+                // Place flowers ON the grass strip (y: 145-155), not above it
+                const yPos = 148 + (i % 2) * 3; // Slight variation but ON the grass
                 drawWildflower(flowerX, yPos, flower.type, flower.petalColor);
             }
         }
@@ -1150,14 +1153,19 @@ function drawBackground() {
     ctx.fillRect(0, 345, 800, 10);
     
     // Bottom wildflowers (draw after grass so they're not covered)
+    // Spread them across the bottom grass area
     if (game.flowers && game.flowers.length > 0) {
-        for (let flower of game.flowers) {
+        // Use second half of flowers for bottom grass
+        for (let i = Math.floor(game.flowers.length / 2); i < game.flowers.length; i++) {
+            const flower = game.flowers[i];
             // Scroll right to left with the background - simple modulo like trees
             let flowerX = (flower.x + 35 + game.backgroundX * 0.8) % 2000;
             if (flowerX < 0) flowerX += 2000;
             
             if (flowerX > -20 && flowerX < 820) {
-                const yPos = 358 + (flower.yOffset || 0);
+                // Spread flowers across the grass area (y: 350-395)
+                const baseY = 355 + ((i - Math.floor(game.flowers.length / 2)) * 8) % 35; // Distribute across grass
+                const yPos = baseY + (flower.yOffset || 0);
                 drawWildflower(flowerX, yPos, flower.type, flower.petalColor);
             }
         }
