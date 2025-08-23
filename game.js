@@ -81,8 +81,9 @@ const game = {
     fishSpawnInterval: 120,
     vehicleSpawnTimer: 0,
     vehicleSpawnInterval: 90, // frames between vehicle spawns
+    sootSpriteSpawnTimer: 0,
+    sootSpriteSpawnInterval: 600, // Very rare - about every 10 seconds at 60fps
     clouds: [], // Persistent cloud data
-    sootSprites: [], // Persistent soot sprite data
     groundPatches: [], // Persistent ground texture patches
     grassPatches: [], // Persistent grass patches
     flowers: [] // Persistent flower data
@@ -103,6 +104,7 @@ const player2Stats = {
 const carrots = [];
 const fish = [];
 const vehicles = [];
+const sootSprites = [];
 
 // Oregon Bunny Character
 const bunny = {
@@ -650,6 +652,72 @@ class Carrot {
     }
 }
 
+// Soot Sprite class (rare collectible)
+class SootSprite {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = 8 + Math.random() * 8;
+        this.eyeOffset = Math.random() * 2;
+        this.collected = false;
+        this.floatOffset = Math.random() * Math.PI * 2;
+        this.width = this.size * 2 + 4; // Account for fuzzy edges
+        this.height = this.size * 2 + 4;
+    }
+    
+    update() {
+        // Move left with the game
+        this.x -= game.speed * 0.5;
+        
+        // Gentle floating motion
+        this.y += Math.sin(Date.now() * 0.002 + this.floatOffset) * 0.3;
+    }
+    
+    draw() {
+        ctx.save();
+        
+        // Fuzzy black body
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Fuzzy edges
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const spikeX = this.x + Math.cos(angle) * (this.size + 2);
+            const spikeY = this.y + Math.sin(angle) * (this.size + 2);
+            ctx.beginPath();
+            ctx.arc(spikeX, spikeY, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Big white eyes
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(this.x - 3, this.y - 1, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + 3, this.y - 1, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Pupils (with animated offset)
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.x - 3 + this.eyeOffset, this.y - 1, 1, 0, Math.PI * 2);
+        ctx.arc(this.x + 3 + this.eyeOffset, this.y - 1, 1, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    checkCollision(character) {
+        // Simple circle collision for soot sprites
+        const dx = character.x + character.width/2 - this.x;
+        const dy = character.y + character.height/2 - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < this.size + Math.min(character.width, character.height)/2;
+    }
+}
+
 // Fish class
 class Fish {
     constructor(x, y) {
@@ -918,21 +986,21 @@ function drawBackground() {
     ctx.closePath();
     ctx.fill();
     
-    // Totoro-style giant trees in background
-    for (let i = 0; i < 5; i++) {
-        let treeX = ((game.backgroundX * 0.3 + i * 200) % 1000) - 100;
-        if (treeX < 850 && treeX > -50) {
-            drawGhibliTree(treeX, 80, 0.5 + (i % 2) * 0.2);
-        }
-    }
-    
-    // Fluffy Totoro-style clouds (use persistent cloud data)
+    // Fluffy Totoro-style clouds (drawn BEFORE trees so they appear behind)
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     if (game.clouds && game.clouds.length > 0) {
         for (let i = 0; i < game.clouds.length; i++) {
             let cloudOffset = (game.backgroundX * 0.1 + game.clouds[i].x);
             let cloudX = ((cloudOffset % 900) + 900) % 900 - 100;
             drawTotoroCloud(cloudX, game.clouds[i].y, game.clouds[i].circles);
+        }
+    }
+    
+    // Totoro-style giant trees in background (drawn AFTER clouds so they appear in front)
+    for (let i = 0; i < 5; i++) {
+        let treeX = ((game.backgroundX * 0.3 + i * 200) % 1000) - 100;
+        if (treeX < 850 && treeX > -50) {
+            drawGhibliTree(treeX, 80, 0.5 + (i % 2) * 0.2);
         }
     }
     
@@ -945,7 +1013,11 @@ function drawBackground() {
     ctx.fillStyle = '#7A6449';
     if (game.groundPatches && game.groundPatches.length > 0) {
         for (let patch of game.groundPatches) {
-            let patchX = ((game.backgroundX * 0.5 + patch.x) % 1200) - 100;
+            // Use proper wrapping to ensure continuous display
+            let baseX = patch.x - (game.backgroundX * 0.5);
+            let patchX = baseX % 1200;
+            if (patchX < -100) patchX += 1200;
+            
             if (patchX > -50 && patchX < 850) {
                 ctx.beginPath();
                 ctx.ellipse(patchX, patch.y, 30, 10, patch.rotation, 0, Math.PI * 2);
@@ -958,7 +1030,11 @@ function drawBackground() {
     ctx.fillStyle = '#6B8E23';
     if (game.grassPatches && game.grassPatches.length > 0) {
         for (let patch of game.grassPatches) {
-            let grassX = ((game.backgroundX * 0.7 + patch.x) % 1200) - 100;
+            // Use proper wrapping to ensure continuous display
+            let baseX = patch.x - (game.backgroundX * 0.7);
+            let grassX = baseX % 1200;
+            if (grassX < -100) grassX += 1200;
+            
             if (grassX > -20 && grassX < 820) {
                 ctx.beginPath();
                 ctx.ellipse(grassX, patch.y, 15, 8, 0, 0, Math.PI * 2);
@@ -978,7 +1054,11 @@ function drawBackground() {
         // Wildflowers (use persistent flower data)
         if (game.flowers && game.flowers.length > 0) {
             for (let flower of game.flowers) {
-                let flowerX = ((game.backgroundX * 0.8 + flower.x + (side * 35)) % 1680) - 100;
+                // Use proper wrapping to ensure continuous display
+                let baseX = flower.x + (side * 35) - (game.backgroundX * 0.8);
+                let flowerX = baseX % 1680;
+                if (flowerX < -100) flowerX += 1680;
+                
                 if (flowerX > -20 && flowerX < 820) {
                     drawWildflower(flowerX, y + (side === 0 ? -8 : 8), flower.type, flower.petalColor);
                 }
@@ -993,27 +1073,7 @@ function drawBackground() {
     ctx.fillStyle = grassGradient;
     ctx.fillRect(0, 350, 800, 50);
     
-    // Add soot sprites (susuwatari) - manage them persistently
-    if (Math.random() < 0.02 && game.sootSprites.length < 5) {
-        game.sootSprites.push({
-            x: Math.random() * 800,
-            y: 100 + Math.random() * 250,
-            size: 8 + Math.random() * 8,
-            eyeOffset: Math.random() * 2
-        });
-    }
-    
-    // Update and draw soot sprites
-    for (let i = game.sootSprites.length - 1; i >= 0; i--) {
-        const sprite = game.sootSprites[i];
-        sprite.x -= game.speed * 0.5; // Move with background
-        
-        if (sprite.x < -20) {
-            game.sootSprites.splice(i, 1); // Remove off-screen sprites
-        } else {
-            drawSootSprite(sprite.x, sprite.y, sprite.size, sprite.eyeOffset);
-        }
-    }
+    // Soot sprites are now collectible items, handled in the game loop
 }
 
 // Draw Totoro-style fluffy cloud
@@ -1131,42 +1191,6 @@ function drawWildflower(x, y, type, petalColor) {
     ctx.restore();
 }
 
-// Draw soot sprites (susuwatari)
-function drawSootSprite(x, y, size = 8, eyeOffset = 0) {
-    ctx.save();
-    
-    // Fuzzy black body
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Fuzzy edges
-    for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const spikeX = x + Math.cos(angle) * (size + 2);
-        const spikeY = y + Math.sin(angle) * (size + 2);
-        ctx.beginPath();
-        ctx.arc(spikeX, spikeY, 2, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    
-    // Big white eyes
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(x - 3, y - 1, 3, 0, Math.PI * 2);
-    ctx.arc(x + 3, y - 1, 3, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Pupils (with persistent offset)
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(x - 3 + eyeOffset, y - 1, 1, 0, Math.PI * 2);
-    ctx.arc(x + 3 + eyeOffset, y - 1, 1, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.restore();
-}
 
 // Draw game over screen
 function drawGameOver() {
@@ -1357,6 +1381,17 @@ function gameLoop() {
         vehicles.push(vehicle);
     }
     
+    // Spawn soot sprites (very rare)
+    game.sootSpriteSpawnTimer++;
+    if (game.sootSpriteSpawnTimer >= game.sootSpriteSpawnInterval) {
+        game.sootSpriteSpawnTimer = 0;
+        // Random chance to actually spawn (making them even rarer)
+        if (Math.random() < 0.5) { // 50% chance when timer is up
+            const yPosition = 160 + Math.random() * 140; // Spawn in playable area
+            sootSprites.push(new SootSprite(canvas.width + 50, yPosition));
+        }
+    }
+    
     // Update carrots
     for (let i = carrots.length - 1; i >= 0; i--) {
         const carrot = carrots[i];
@@ -1391,6 +1426,33 @@ function gameLoop() {
             if (fishItem.x < -fishItem.width) {
                 fish.splice(i, 1);
             }
+        }
+    }
+    
+    // Update soot sprites
+    for (let i = sootSprites.length - 1; i >= 0; i--) {
+        const sprite = sootSprites[i];
+        sprite.update();
+        
+        // Soot sprites give a big energy boost and can be collected by either character
+        // Check collision with bunny
+        if (sprite.checkCollision(bunny) && CharacterSystem.canCollect(bunny, player1Stats)) {
+            player1Stats.energy = Math.min(100, player1Stats.energy + 50); // Big energy boost!
+            sootSprites.splice(i, 1);
+            continue;
+        }
+        
+        // Check collision with orange cat in multiplayer
+        if (game.multiplayer && orangeCat.active && sprite.checkCollision(orangeCat) && 
+            CharacterSystem.canCollect(orangeCat, player2Stats)) {
+            player2Stats.energy = Math.min(100, player2Stats.energy + 50); // Big energy boost!
+            sootSprites.splice(i, 1);
+            continue;
+        }
+        
+        // Remove sprites that have gone off screen
+        if (sprite.x < -sprite.width) {
+            sootSprites.splice(i, 1);
         }
     }
     
@@ -1434,6 +1496,9 @@ function gameLoop() {
         fish.forEach(fishItem => fishItem.draw());
     }
     
+    // Draw soot sprites (magical collectibles)
+    sootSprites.forEach(sprite => sprite.draw());
+    
     bunny.draw();
     if (game.multiplayer) {
         orangeCat.draw();
@@ -1466,6 +1531,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
             carrots.length = 0;
             fish.length = 0;
             vehicles.length = 0;
+            sootSprites.length = 0;
             
             // Initialize clouds with persistent data
             game.clouds = [];
@@ -1485,8 +1551,6 @@ document.getElementById('startBtn').addEventListener('click', () => {
                 }
             }
             
-            // Initialize soot sprites
-            game.sootSprites = [];
             
             // Initialize ground patches
             game.groundPatches = [];
@@ -1543,6 +1607,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
             carrots.length = 0; // Clear all carrots
             fish.length = 0; // Clear all fish
             vehicles.length = 0; // Clear all vehicles
+            sootSprites.length = 0; // Clear all soot sprites
         }
         gameLoop();
     } else {
@@ -1692,8 +1757,6 @@ for (let i = 0; i < 3; i++) {
     }
 }
 
-// Initialize soot sprites
-game.sootSprites = [];
 
 // Initialize ground patches
 game.groundPatches = [];
