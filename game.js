@@ -2,6 +2,70 @@
 const canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 
+// Character Management System
+const CharacterSystem = {
+    // Check if a character can perform actions (move, collect items, etc)
+    canAct(character, stats) {
+        return stats.energy > 0 && (character.active === undefined || character.active);
+    },
+    
+    // Check if a character can collect items
+    canCollect(character, stats) {
+        return this.canAct(character, stats) && !character.invulnerable;
+    },
+    
+    // Check if character should be drawn
+    shouldDraw(character, stats) {
+        return stats.energy > 0 && (character.active === undefined || character.active);
+    },
+    
+    // Check if character is in invulnerable flash state
+    isFlashing(character, stats) {
+        return character.invulnerable && stats.energy > 0 && 
+               Math.floor(character.invulnerableTimer / 5) % 2 === 0;
+    },
+    
+    // Handle taking damage for any character
+    takeDamage(character, stats, amount, resetX, resetY) {
+        if (stats.energy <= 0 || character.invulnerable) return false;
+        
+        const newEnergy = Math.max(0, stats.energy - amount);
+        
+        // Only reset position if still alive after damage
+        if (newEnergy > 0) {
+            character.x = resetX;
+            character.y = resetY;
+            character.targetX = resetX;
+            character.targetY = resetY;
+        }
+        
+        stats.energy = newEnergy;
+        character.invulnerable = true;
+        character.invulnerableTimer = 60;
+        
+        return true;
+    },
+    
+    // Handle collecting items for any character
+    collectItem(character, stats, itemType, energyRestore = 20) {
+        if (!this.canCollect(character, stats)) return false;
+        
+        stats[itemType]++;
+        stats.energy = Math.min(100, stats.energy + energyRestore);
+        return true;
+    },
+    
+    // Update invulnerability timer
+    updateInvulnerability(character, stats) {
+        if (character.invulnerable && character.invulnerableTimer > 0 && stats.energy > 0) {
+            character.invulnerableTimer--;
+            if (character.invulnerableTimer <= 0) {
+                character.invulnerable = false;
+            }
+        }
+    }
+};
+
 // Game State
 const game = {
     running: false,
@@ -16,7 +80,12 @@ const game = {
     fishSpawnTimer: 60, // offset fish spawning
     fishSpawnInterval: 120,
     vehicleSpawnTimer: 0,
-    vehicleSpawnInterval: 90 // frames between vehicle spawns
+    vehicleSpawnInterval: 90, // frames between vehicle spawns
+    clouds: [], // Persistent cloud data
+    sootSprites: [], // Persistent soot sprite data
+    groundPatches: [], // Persistent ground texture patches
+    grassPatches: [], // Persistent grass patches
+    flowers: [] // Persistent flower data
 };
 
 // Player stats
@@ -52,11 +121,11 @@ const bunny = {
     invulnerableTimer: 0,
     
     draw() {
-        // Don't draw if energy is depleted
-        if (player1Stats.energy <= 0) return;
+        // Use CharacterSystem to check if should draw
+        if (!CharacterSystem.shouldDraw(this, player1Stats)) return;
         
-        // Flash when invulnerable (but only if still has energy)
-        if (this.invulnerable && player1Stats.energy > 0 && Math.floor(this.invulnerableTimer / 5) % 2 === 0) {
+        // Flash when invulnerable using CharacterSystem
+        if (CharacterSystem.isFlashing(this, player1Stats)) {
             return; // Skip drawing every 5 frames for flashing effect
         }
         
@@ -143,13 +212,8 @@ const bunny = {
     },
     
     update() {
-        // Handle invulnerability timer (only if still has energy)
-        if (this.invulnerable && this.invulnerableTimer > 0 && player1Stats.energy > 0) {
-            this.invulnerableTimer--;
-            if (this.invulnerableTimer <= 0) {
-                this.invulnerable = false;
-            }
-        }
+        // Handle invulnerability timer using CharacterSystem
+        CharacterSystem.updateInvulnerability(this, player1Stats);
         
         // No gravity for Frogger-style movement
         // Smooth transition to target position
@@ -230,11 +294,11 @@ const orangeCat = {
     draw() {
         if (!this.active) return;
         
-        // Don't draw if energy is depleted
-        if (player2Stats.energy <= 0) return;
+        // Use CharacterSystem to check if should draw
+        if (!CharacterSystem.shouldDraw(this, player2Stats)) return;
         
-        // Flash when invulnerable (but only if still has energy)
-        if (this.invulnerable && player2Stats.energy > 0 && Math.floor(this.invulnerableTimer / 5) % 2 === 0) {
+        // Flash when invulnerable using CharacterSystem
+        if (CharacterSystem.isFlashing(this, player2Stats)) {
             return; // Skip drawing every 5 frames for flashing effect
         }
         
@@ -378,13 +442,8 @@ const orangeCat = {
     update() {
         if (!this.active) return;
         
-        // Handle invulnerability timer (only if still has energy)
-        if (this.invulnerable && this.invulnerableTimer > 0 && player2Stats.energy > 0) {
-            this.invulnerableTimer--;
-            if (this.invulnerableTimer <= 0) {
-                this.invulnerable = false;
-            }
-        }
+        // Handle invulnerability timer using CharacterSystem
+        CharacterSystem.updateInvulnerability(this, player2Stats);
         
         // Same movement system as bunny
         let movementComplete = true;
@@ -461,39 +520,39 @@ document.addEventListener('keydown', (e) => {
         
         switch(e.key) {
             case 'ArrowUp':
-                if (player1Stats.energy > 0) bunny.hop('up');
+                if (CharacterSystem.canAct(bunny, player1Stats)) bunny.hop('up');
                 break;
             case 'ArrowDown':
-                if (player1Stats.energy > 0) bunny.hop('down');
+                if (CharacterSystem.canAct(bunny, player1Stats)) bunny.hop('down');
                 break;
             case 'ArrowLeft':
-                if (player1Stats.energy > 0) bunny.hop('left');
+                if (CharacterSystem.canAct(bunny, player1Stats)) bunny.hop('left');
                 break;
             case 'ArrowRight':
-                if (player1Stats.energy > 0) bunny.hop('right');
+                if (CharacterSystem.canAct(bunny, player1Stats)) bunny.hop('right');
                 break;
             // WASD controls for Orange Cat (Player 2)
             case 'w':
             case 'W':
-                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
+                if (game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
                     orangeCat.hop('up');
                 }
                 break;
             case 's':
             case 'S':
-                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
+                if (game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
                     orangeCat.hop('down');
                 }
                 break;
             case 'a':
             case 'A':
-                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
+                if (game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
                     orangeCat.hop('left');
                 }
                 break;
             case 'd':
             case 'D':
-                if (game.multiplayer && orangeCat.active && player2Stats.energy > 0) {
+                if (game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
                     orangeCat.hop('right');
                 }
                 break;
@@ -867,12 +926,14 @@ function drawBackground() {
         }
     }
     
-    // Fluffy Totoro-style clouds
+    // Fluffy Totoro-style clouds (use persistent cloud data)
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    for (let i = 0; i < 3; i++) {
-        let cloudOffset = (game.backgroundX * 0.1 + i * 300);
-        let cloudX = ((cloudOffset % 900) + 900) % 900 - 100;
-        drawTotoroCloud(cloudX, 20 + i * 25);
+    if (game.clouds && game.clouds.length > 0) {
+        for (let i = 0; i < game.clouds.length; i++) {
+            let cloudOffset = (game.backgroundX * 0.1 + game.clouds[i].x);
+            let cloudX = ((cloudOffset % 900) + 900) % 900 - 100;
+            drawTotoroCloud(cloudX, game.clouds[i].y, game.clouds[i].circles);
+        }
     }
     
     // Forest path instead of highway - dirt road with grass patches
@@ -880,22 +941,30 @@ function drawBackground() {
     ctx.fillStyle = '#8B7355';
     ctx.fillRect(0, 150, 800, 200);
     
-    // Add texture to path
+    // Add texture to path (use persistent patches)
     ctx.fillStyle = '#7A6449';
-    for (let i = 0; i < 20; i++) {
-        let patchX = ((game.backgroundX * 0.5 + i * 60) % 850) - 50;
-        ctx.beginPath();
-        ctx.ellipse(patchX, 180 + i * 15, 30, 10, Math.random(), 0, Math.PI * 2);
-        ctx.fill();
+    if (game.groundPatches && game.groundPatches.length > 0) {
+        for (let patch of game.groundPatches) {
+            let patchX = ((game.backgroundX * 0.5 + patch.x) % 1200) - 100;
+            if (patchX > -50 && patchX < 850) {
+                ctx.beginPath();
+                ctx.ellipse(patchX, patch.y, 30, 10, patch.rotation, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
     }
     
-    // Grass patches on the path
+    // Grass patches on the path (use persistent patches)
     ctx.fillStyle = '#6B8E23';
-    for (let i = 0; i < 15; i++) {
-        let grassX = ((game.backgroundX * 0.7 + i * 80) % 900) - 100;
-        ctx.beginPath();
-        ctx.ellipse(grassX, 160 + i * 20, 15, 8, 0, 0, Math.PI * 2);
-        ctx.fill();
+    if (game.grassPatches && game.grassPatches.length > 0) {
+        for (let patch of game.grassPatches) {
+            let grassX = ((game.backgroundX * 0.7 + patch.x) % 1200) - 100;
+            if (grassX > -20 && grassX < 820) {
+                ctx.beginPath();
+                ctx.ellipse(grassX, patch.y, 15, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
     }
     
     // Path edges with wildflowers
@@ -906,10 +975,14 @@ function drawBackground() {
         ctx.fillStyle = '#4A7C2E';
         ctx.fillRect(0, y - 5, 800, 10);
         
-        // Wildflowers
-        for (let i = 0; i < 12; i++) {
-            let flowerX = ((game.backgroundX * 0.8 + i * 70) % 850) - 50;
-            drawWildflower(flowerX, y + (side === 0 ? -8 : 8), i);
+        // Wildflowers (use persistent flower data)
+        if (game.flowers && game.flowers.length > 0) {
+            for (let flower of game.flowers) {
+                let flowerX = ((game.backgroundX * 0.8 + flower.x + (side * 35)) % 1680) - 100;
+                if (flowerX > -20 && flowerX < 820) {
+                    drawWildflower(flowerX, y + (side === 0 ? -8 : 8), flower.type, flower.petalColor);
+                }
+            }
         }
     }
     
@@ -920,24 +993,50 @@ function drawBackground() {
     ctx.fillStyle = grassGradient;
     ctx.fillRect(0, 350, 800, 50);
     
-    // Add some soot sprites (susuwatari) occasionally
-    if (Math.random() < 0.02) {
-        drawSootSprite(Math.random() * 800, 100 + Math.random() * 250);
+    // Add soot sprites (susuwatari) - manage them persistently
+    if (Math.random() < 0.02 && game.sootSprites.length < 5) {
+        game.sootSprites.push({
+            x: Math.random() * 800,
+            y: 100 + Math.random() * 250,
+            size: 8 + Math.random() * 8,
+            eyeOffset: Math.random() * 2
+        });
+    }
+    
+    // Update and draw soot sprites
+    for (let i = game.sootSprites.length - 1; i >= 0; i--) {
+        const sprite = game.sootSprites[i];
+        sprite.x -= game.speed * 0.5; // Move with background
+        
+        if (sprite.x < -20) {
+            game.sootSprites.splice(i, 1); // Remove off-screen sprites
+        } else {
+            drawSootSprite(sprite.x, sprite.y, sprite.size, sprite.eyeOffset);
+        }
     }
 }
 
 // Draw Totoro-style fluffy cloud
-function drawTotoroCloud(x, y) {
+function drawTotoroCloud(x, y, circles) {
     ctx.save();
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    // Make clouds extra fluffy with multiple circles
-    for (let i = 0; i < 5; i++) {
-        const offsetX = i * 15 - 10;
-        const offsetY = Math.sin(i) * 8;
-        const radius = 20 + Math.random() * 10;
-        ctx.beginPath();
-        ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2);
-        ctx.fill();
+    // Use persistent circle data if provided
+    if (circles && circles.length > 0) {
+        for (let circle of circles) {
+            ctx.beginPath();
+            ctx.arc(x + circle.offsetX, y + circle.offsetY, circle.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else {
+        // Fallback for old clouds
+        for (let i = 0; i < 5; i++) {
+            const offsetX = i * 15 - 10;
+            const offsetY = Math.sin(i) * 8;
+            const radius = 20 + Math.random() * 10;
+            ctx.beginPath();
+            ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
     ctx.restore();
 }
@@ -996,7 +1095,7 @@ function drawGhibliTree(x, y, scale = 1) {
 }
 
 // Draw wildflowers
-function drawWildflower(x, y, index) {
+function drawWildflower(x, y, type, petalColor) {
     ctx.save();
     
     // Stem
@@ -1007,9 +1106,12 @@ function drawWildflower(x, y, index) {
     ctx.lineTo(x, y - 10);
     ctx.stroke();
     
-    // Flower petals - vary colors
-    const colors = ['#FFB6C1', '#FFD700', '#E6E6FA', '#FFA07A', '#98FB98'];
-    ctx.fillStyle = colors[index % colors.length];
+    // Flower petals - use provided color or fallback
+    if (!petalColor) {
+        const colors = ['#FFB6C1', '#FFD700', '#E6E6FA', '#FFA07A', '#98FB98'];
+        petalColor = colors[type % colors.length];
+    }
+    ctx.fillStyle = petalColor;
     
     for (let i = 0; i < 5; i++) {
         const angle = (i / 5) * Math.PI * 2;
@@ -1030,20 +1132,20 @@ function drawWildflower(x, y, index) {
 }
 
 // Draw soot sprites (susuwatari)
-function drawSootSprite(x, y) {
+function drawSootSprite(x, y, size = 8, eyeOffset = 0) {
     ctx.save();
     
     // Fuzzy black body
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.beginPath();
-    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.arc(x, y, size, 0, Math.PI * 2);
     ctx.fill();
     
     // Fuzzy edges
     for (let i = 0; i < 8; i++) {
         const angle = (i / 8) * Math.PI * 2;
-        const spikeX = x + Math.cos(angle) * 10;
-        const spikeY = y + Math.sin(angle) * 10;
+        const spikeX = x + Math.cos(angle) * (size + 2);
+        const spikeY = y + Math.sin(angle) * (size + 2);
         ctx.beginPath();
         ctx.arc(spikeX, spikeY, 2, 0, Math.PI * 2);
         ctx.fill();
@@ -1056,11 +1158,11 @@ function drawSootSprite(x, y) {
     ctx.arc(x + 3, y - 1, 3, 0, Math.PI * 2);
     ctx.fill();
     
-    // Pupils
+    // Pupils (with persistent offset)
     ctx.fillStyle = 'black';
     ctx.beginPath();
-    ctx.arc(x - 3, y - 1, 1, 0, Math.PI * 2);
-    ctx.arc(x + 3, y - 1, 1, 0, Math.PI * 2);
+    ctx.arc(x - 3 + eyeOffset, y - 1, 1, 0, Math.PI * 2);
+    ctx.arc(x + 3 + eyeOffset, y - 1, 1, 0, Math.PI * 2);
     ctx.fill();
     
     ctx.restore();
@@ -1260,10 +1362,8 @@ function gameLoop() {
         const carrot = carrots[i];
         carrot.update();
         
-        // Only bunny can collect carrots
-        if (carrot.checkCollision(bunny)) {
-            player1Stats.carrots++;
-            player1Stats.energy = Math.min(100, player1Stats.energy + 20); // Restore 20 energy
+        // Only bunny can collect carrots (using CharacterSystem)
+        if (carrot.checkCollision(bunny) && CharacterSystem.collectItem(bunny, player1Stats, 'carrots', 20)) {
             carrots.splice(i, 1);
             continue;
         }
@@ -1280,10 +1380,9 @@ function gameLoop() {
             const fishItem = fish[i];
             fishItem.update();
             
-            // Only orange cat can collect fish
-            if (orangeCat.active && fishItem.checkCollision(orangeCat)) {
-                player2Stats.fish++;
-                player2Stats.energy = Math.min(100, player2Stats.energy + 20); // Restore 20 energy
+            // Only orange cat can collect fish (using CharacterSystem)
+            if (orangeCat.active && fishItem.checkCollision(orangeCat) && 
+                CharacterSystem.collectItem(orangeCat, player2Stats, 'fish', 20)) {
                 fish.splice(i, 1);
                 continue;
             }
@@ -1300,38 +1399,14 @@ function gameLoop() {
         const vehicle = vehicles[i];
         vehicle.update(vehicles);
         
-        // Check collision with bunny (only if bunny has energy and not invulnerable)
-        if (player1Stats.energy > 0 && !bunny.invulnerable && vehicle.checkCollision(bunny)) {
-            // Only reset position if still has energy after collision
-            const newEnergy = Math.max(0, player1Stats.energy - 25);
-            if (newEnergy > 0) {
-                // Reset bunny position
-                bunny.x = 100;
-                bunny.y = 260;
-                bunny.targetX = bunny.x;
-                bunny.targetY = bunny.y;
-            }
-            player1Stats.energy = newEnergy;
-            // Make bunny invulnerable for 60 frames (1 second at 60fps)
-            bunny.invulnerable = true;
-            bunny.invulnerableTimer = 60;
+        // Check collision with bunny (using CharacterSystem)
+        if (vehicle.checkCollision(bunny)) {
+            CharacterSystem.takeDamage(bunny, player1Stats, 25, 100, 260);
         }
         
-        // Check collision with orange cat in multiplayer (only if cat has energy and not invulnerable)
-        if (game.multiplayer && orangeCat.active && player2Stats.energy > 0 && !orangeCat.invulnerable && vehicle.checkCollision(orangeCat)) {
-            // Only reset position if still has energy after collision
-            const newEnergy = Math.max(0, player2Stats.energy - 25);
-            if (newEnergy > 0) {
-                // Reset orange cat position
-                orangeCat.x = 100;
-                orangeCat.y = 210;
-                orangeCat.targetX = orangeCat.x;
-                orangeCat.targetY = orangeCat.y;
-            }
-            player2Stats.energy = newEnergy;
-            // Make orange cat invulnerable for 60 frames (1 second at 60fps)
-            orangeCat.invulnerable = true;
-            orangeCat.invulnerableTimer = 60;
+        // Check collision with orange cat in multiplayer (using CharacterSystem)
+        if (game.multiplayer && orangeCat.active && vehicle.checkCollision(orangeCat)) {
+            CharacterSystem.takeDamage(orangeCat, player2Stats, 25, 100, 210);
         }
         
         // Remove vehicles that have gone off screen
@@ -1391,6 +1466,57 @@ document.getElementById('startBtn').addEventListener('click', () => {
             carrots.length = 0;
             fish.length = 0;
             vehicles.length = 0;
+            
+            // Initialize clouds with persistent data
+            game.clouds = [];
+            for (let i = 0; i < 3; i++) {
+                game.clouds.push({
+                    x: i * 300,
+                    y: 20 + i * 25,
+                    circles: []
+                });
+                // Generate random circles for each cloud
+                for (let j = 0; j < 5; j++) {
+                    game.clouds[i].circles.push({
+                        offsetX: j * 15 - 10,
+                        offsetY: Math.sin(j) * 8,
+                        radius: 20 + Math.random() * 10
+                    });
+                }
+            }
+            
+            // Initialize soot sprites
+            game.sootSprites = [];
+            
+            // Initialize ground patches
+            game.groundPatches = [];
+            for (let i = 0; i < 20; i++) {
+                game.groundPatches.push({
+                    x: i * 60,
+                    y: 180 + i * 15,
+                    rotation: Math.random() * Math.PI
+                });
+            }
+            
+            // Initialize grass patches
+            game.grassPatches = [];
+            for (let i = 0; i < 15; i++) {
+                game.grassPatches.push({
+                    x: i * 80,
+                    y: 160 + i * 20
+                });
+            }
+            
+            // Initialize flowers
+            game.flowers = [];
+            for (let i = 0; i < 24; i++) {
+                game.flowers.push({
+                    x: i * 70,
+                    type: i % 3,
+                    petalColor: ['#FF69B4', '#FFD700', '#9370DB'][i % 3]
+                });
+            }
+            
             // Reset character positions and states
             bunny.x = 100;
             bunny.y = 260;
@@ -1547,6 +1673,57 @@ window.addEventListener('resize', () => {
 
 // Initial setup
 resizeCanvas();
+
+// Initialize clouds on page load
+game.clouds = [];
+for (let i = 0; i < 3; i++) {
+    game.clouds.push({
+        x: i * 300,
+        y: 20 + i * 25,
+        circles: []
+    });
+    // Generate random circles for each cloud
+    for (let j = 0; j < 5; j++) {
+        game.clouds[i].circles.push({
+            offsetX: j * 15 - 10,
+            offsetY: Math.sin(j) * 8,
+            radius: 20 + Math.random() * 10
+        });
+    }
+}
+
+// Initialize soot sprites
+game.sootSprites = [];
+
+// Initialize ground patches
+game.groundPatches = [];
+for (let i = 0; i < 20; i++) {
+    game.groundPatches.push({
+        x: i * 60,
+        y: 180 + i * 15,
+        rotation: Math.random() * Math.PI
+    });
+}
+
+// Initialize grass patches
+game.grassPatches = [];
+for (let i = 0; i < 15; i++) {
+    game.grassPatches.push({
+        x: i * 80,
+        y: 160 + i * 20
+    });
+}
+
+// Initialize flowers
+game.flowers = [];
+for (let i = 0; i < 24; i++) {
+    game.flowers.push({
+        x: i * 70,
+        type: i % 3,
+        petalColor: ['#FF69B4', '#FFD700', '#9370DB'][i % 3]
+    });
+}
+
 drawBackground();
 bunny.draw();
 
@@ -1563,9 +1740,9 @@ mobileButtons.forEach(btn => {
         const direction = btn.dataset.direction;
         
         if (game.running && !game.gameOver) {
-            if (player === '1' && player1Stats.energy > 0) {
+            if (player === '1' && CharacterSystem.canAct(bunny, player1Stats)) {
                 bunny.hop(direction);
-            } else if (player === '2' && game.multiplayer && player2Stats.energy > 0) {
+            } else if (player === '2' && game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
                 orangeCat.hop(direction);
             }
         }
@@ -1578,9 +1755,9 @@ mobileButtons.forEach(btn => {
         const direction = btn.dataset.direction;
         
         if (game.running && !game.gameOver) {
-            if (player === '1' && player1Stats.energy > 0) {
+            if (player === '1' && CharacterSystem.canAct(bunny, player1Stats)) {
                 bunny.hop(direction);
-            } else if (player === '2' && game.multiplayer && player2Stats.energy > 0) {
+            } else if (player === '2' && game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
                 orangeCat.hop(direction);
             }
         }
