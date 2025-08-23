@@ -299,8 +299,8 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Show mobile controls on touch devices */
-@media (pointer: coarse), (any-pointer: coarse) {
+/* Show mobile controls on touch devices (but not Xbox/TV) */
+@media (pointer: coarse) and (max-width: 1024px), (any-pointer: coarse) and (max-width: 1024px) {
     .mobile-controls {
         display: flex;
     }
@@ -310,7 +310,8 @@ body {
     }
 }
 
-/* Wide screen layout - controls on sides */
+/* Wide screen layout - controls on sides (disabled for TV/Xbox) */
+/* Commenting out to prevent Xbox from showing controls
 @media (min-width: 1025px) and (pointer: coarse), 
        (min-width: 1025px) and (any-pointer: coarse) {
     .game-area {
@@ -329,6 +330,7 @@ body {
         flex-shrink: 0;
     }
 }
+*/
 
 /* Layout adjustments for different screen sizes */
 @media (max-width: 1024px) {
