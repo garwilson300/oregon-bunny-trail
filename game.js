@@ -1113,30 +1113,27 @@ function drawBackground() {
         }
     }
     
-    // Path edges with wildflowers
+    // Draw top edge grass and flowers first
     ctx.setLineDash([]);
-    for (let side = 0; side <= 1; side++) {
-        const y = side === 0 ? 150 : 350;
-        // Grass edge
-        ctx.fillStyle = isDarkMode() ? '#1a3a2a' : '#4A7C2E';
-        ctx.fillRect(0, y - 5, 800, 10);
-        
-        // Wildflowers (use persistent flower data)
-        if (game.flowers && game.flowers.length > 0) {
-            for (let flower of game.flowers) {
-                // Scroll right to left with the background - simple modulo like trees
-                let flowerX = (flower.x + (side * 35) + game.backgroundX * 0.8) % 2000;
-                if (flowerX < 0) flowerX += 2000;
-                
-                if (flowerX > -20 && flowerX < 820) {
-                    const yPos = y + (side === 0 ? -8 : 8) + (flower.yOffset || 0);
-                    drawWildflower(flowerX, yPos, flower.type, flower.petalColor);
-                }
+    // Top grass edge
+    ctx.fillStyle = isDarkMode() ? '#1a3a2a' : '#4A7C2E';
+    ctx.fillRect(0, 145, 800, 10);
+    
+    // Top wildflowers
+    if (game.flowers && game.flowers.length > 0) {
+        for (let flower of game.flowers) {
+            // Scroll right to left with the background - simple modulo like trees
+            let flowerX = (flower.x + game.backgroundX * 0.8) % 2000;
+            if (flowerX < 0) flowerX += 2000;
+            
+            if (flowerX > -20 && flowerX < 820) {
+                const yPos = 142 + (flower.yOffset || 0);
+                drawWildflower(flowerX, yPos, flower.type, flower.petalColor);
             }
         }
     }
     
-    // Lush grass area after road
+    // Lush grass area after road (draw before bottom flowers)
     const grassGradient = ctx.createLinearGradient(0, 350, 0, 400);
     if (isDarkMode()) {
         grassGradient.addColorStop(0, '#1a3a2a');
@@ -1147,6 +1144,24 @@ function drawBackground() {
     }
     ctx.fillStyle = grassGradient;
     ctx.fillRect(0, 350, 800, 50);
+    
+    // Bottom grass edge
+    ctx.fillStyle = isDarkMode() ? '#1a3a2a' : '#4A7C2E';
+    ctx.fillRect(0, 345, 800, 10);
+    
+    // Bottom wildflowers (draw after grass so they're not covered)
+    if (game.flowers && game.flowers.length > 0) {
+        for (let flower of game.flowers) {
+            // Scroll right to left with the background - simple modulo like trees
+            let flowerX = (flower.x + 35 + game.backgroundX * 0.8) % 2000;
+            if (flowerX < 0) flowerX += 2000;
+            
+            if (flowerX > -20 && flowerX < 820) {
+                const yPos = 358 + (flower.yOffset || 0);
+                drawWildflower(flowerX, yPos, flower.type, flower.petalColor);
+            }
+        }
+    }
     
     // Soot sprites are now collectible items, handled in the game loop
 }
