@@ -718,13 +718,13 @@ class SootSprite {
     }
 }
 
-// Fish class
+// Sardine class (was Fish class)
 class Fish {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.width = 35;
-        this.height = 25;
+        this.width = 40;  // Longer and thinner
+        this.height = 12; // Much flatter like a real sardine
         this.collected = false;
         this.swimOffset = Math.random() * Math.PI * 2;
     }
@@ -733,55 +733,78 @@ class Fish {
         // Move left with the game speed
         this.x -= game.speed;
         
-        // Swimming motion
-        this.y += Math.sin(Date.now() * 0.004 + this.swimOffset) * 0.8;
+        // Swimming motion - more subtle for sardines
+        this.y += Math.sin(Date.now() * 0.004 + this.swimOffset) * 0.5;
     }
     
     draw() {
         ctx.save();
         
-        // Fish body
-        ctx.fillStyle = '#4682B4';
+        // Create gradient for silvery sardine body
+        const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+        gradient.addColorStop(0, '#C0C0C0');    // Silver top
+        gradient.addColorStop(0.5, '#E8E8E8');  // Light silver middle
+        gradient.addColorStop(1, '#A8A8A8');    // Darker silver bottom
+        
+        // Sardine body - elongated ellipse
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2.5, this.height/2, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2, this.y + this.height/2, this.width/2.2, this.height/2, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Fish tail
+        // Blue-green stripe along the side (characteristic of sardines)
+        ctx.strokeStyle = '#4682B4';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(this.x + this.width - 10, this.y + this.height/2);
-        ctx.lineTo(this.x + this.width, this.y + 5);
-        ctx.lineTo(this.x + this.width, this.y + this.height - 5);
-        ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(this.x + 5, this.y + this.height/2 - 2);
+        ctx.lineTo(this.x + this.width - 8, this.y + this.height/2 - 2);
+        ctx.stroke();
         
-        // Fish scales pattern
-        ctx.strokeStyle = '#5F9EA0';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 3; i++) {
+        // Subtle scale texture
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < 5; i++) {
             ctx.beginPath();
-            ctx.arc(this.x + 10 + i * 6, this.y + this.height/2, 3, 0, Math.PI);
+            ctx.arc(this.x + 8 + i * 6, this.y + this.height/2, 2, -Math.PI/3, Math.PI/3);
             ctx.stroke();
         }
         
-        // Fish eye
+        // Sardine tail - V-shaped and smaller
+        ctx.fillStyle = '#B8B8B8';
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width - 5, this.y + this.height/2);
+        ctx.lineTo(this.x + this.width + 2, this.y + 2);
+        ctx.lineTo(this.x + this.width, this.y + this.height/2);
+        ctx.lineTo(this.x + this.width + 2, this.y + this.height - 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Eye - smaller and more realistic
         ctx.fillStyle = 'white';
         ctx.beginPath();
-        ctx.arc(this.x + 8, this.y + this.height/2 - 3, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + 6, this.y + this.height/2 - 1, 2, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = 'black';
         ctx.beginPath();
-        ctx.arc(this.x + 8, this.y + this.height/2 - 3, 1.5, 0, Math.PI * 2);
+        ctx.arc(this.x + 6, this.y + this.height/2 - 1, 1, 0, Math.PI * 2);
         ctx.fill();
         
-        // Fish fin
-        ctx.fillStyle = '#4682B4';
+        // Tiny dorsal fin
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         ctx.beginPath();
-        ctx.moveTo(this.x + this.width/2, this.y);
-        ctx.lineTo(this.x + this.width/2 - 5, this.y - 5);
-        ctx.lineTo(this.x + this.width/2 + 5, this.y - 5);
+        ctx.moveTo(this.x + this.width/2, this.y - 1);
+        ctx.lineTo(this.x + this.width/2 - 3, this.y);
+        ctx.lineTo(this.x + this.width/2 + 3, this.y);
         ctx.closePath();
         ctx.fill();
+        
+        // Gill line
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.arc(this.x + 10, this.y + this.height/2, 3, Math.PI/2, 3*Math.PI/2);
+        ctx.stroke();
         
         ctx.restore();
     }
