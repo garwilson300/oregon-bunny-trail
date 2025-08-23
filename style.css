@@ -187,10 +187,6 @@ body {
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    /* Xbox/TV optimization */
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
 }
 
 .game-controls {
@@ -521,27 +517,6 @@ body {
     
     .game-container {
         display: none;
-    }
-}
-
-/* Xbox/TV specific optimizations */
-@media (min-width: 1920px), (min-resolution: 120dpi) and (min-width: 1280px) {
-    #gameCanvas {
-        image-rendering: auto !important;
-        -ms-interpolation-mode: bicubic;
-    }
-    
-    .game-container {
-        transform: scale(1);
-        transform-origin: center;
-    }
-}
-
-/* Edge browser on Xbox optimizations */
-@supports (-ms-ime-align: auto) {
-    #gameCanvas {
-        image-rendering: auto !important;
-        -ms-interpolation-mode: bicubic;
     }
 }
 

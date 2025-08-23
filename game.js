@@ -1,54 +1,6 @@
 // Game Canvas and Context
 const canvas = document.getElementById('gameCanvas');
-let ctx = canvas.getContext('2d', { 
-    alpha: false,
-    desynchronized: true,
-    willReadFrequently: false 
-});
-
-// Xbox/Edge TV optimization
-function detectXboxOrTV() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isEdge = userAgent.includes('edge/') || userAgent.includes('edg/');
-    const isXbox = userAgent.includes('xbox');
-    const isTV = window.innerWidth >= 1920 || (window.devicePixelRatio > 1.5 && window.innerWidth >= 1280);
-    return isEdge || isXbox || isTV;
-}
-
-function optimizeCanvasForTV() {
-    if (detectXboxOrTV()) {
-        // High-quality rendering for TV displays
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        
-        // Scale canvas for better resolution
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        
-        // Set actual canvas size accounting for device pixel ratio
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        
-        // Scale the drawing context to match device pixel ratio
-        ctx.scale(dpr, dpr);
-        
-        // Ensure canvas CSS size matches layout
-        canvas.style.width = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
-        
-        console.log('TV/Xbox optimization applied:', {
-            dpr,
-            canvasWidth: canvas.width,
-            canvasHeight: canvas.height,
-            cssWidth: rect.width,
-            cssHeight: rect.height
-        });
-    }
-}
-
-// Apply optimizations on load
-window.addEventListener('load', optimizeCanvasForTV);
-window.addEventListener('resize', optimizeCanvasForTV);
+let ctx = canvas.getContext('2d');
 
 // Theme Management
 const themeToggle = document.getElementById('themeToggle');
@@ -1086,12 +1038,8 @@ const LANE_Y = [150, 200, 250, 300];
 
 // Draw background - Totoro inspired
 function drawBackground() {
-    // Get actual canvas dimensions for scaling
-    const canvasWidth = detectXboxOrTV() ? canvas.width / (window.devicePixelRatio || 1) : canvas.width;
-    const canvasHeight = detectXboxOrTV() ? canvas.height / (window.devicePixelRatio || 1) : canvas.height;
-    
     // Sky gradient - soft Ghibli blue or night sky for dark mode
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvasHeight * 0.375);
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, 150);
     if (isDarkMode()) {
         skyGradient.addColorStop(0, '#0f1729');
         skyGradient.addColorStop(1, '#1a2544');
@@ -1474,7 +1422,7 @@ function gameLoop() {
     ctx.setTransform(currentDpr * currentScale, 0, 0, currentDpr * currentScale, 0, 0);
     
     // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, 800, 400);
     
     // Update game
     bunny.update();
@@ -1842,9 +1790,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     updateStats();
     
     // Redraw
-    const clearWidth = detectXboxOrTV() ? canvas.width / (window.devicePixelRatio || 1) : canvas.width;
-    const clearHeight = detectXboxOrTV() ? canvas.height / (window.devicePixelRatio || 1) : canvas.height;
-    ctx.clearRect(0, 0, clearWidth, clearHeight);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
     bunny.draw();
     if (game.multiplayer) {
@@ -1858,12 +1804,6 @@ let dpr = 1;
 
 // Canvas resizing
 function resizeCanvas() {
-    // Skip if Xbox/TV optimization is active
-    if (detectXboxOrTV()) {
-        optimizeCanvasForTV();
-        return;
-    }
-    
     const gameArea = document.querySelector('.game-area');
     const container = document.querySelector('.game-container');
     
@@ -1895,12 +1835,8 @@ function resizeCanvas() {
     canvas.width = newWidth * dpr;
     canvas.height = newHeight * dpr;
     
-    // Re-acquire context after changing canvas dimensions with optimizations
-    ctx = canvas.getContext('2d', { 
-        alpha: false,
-        desynchronized: true,
-        willReadFrequently: false 
-    });
+    // Re-acquire context after changing canvas dimensions
+    ctx = canvas.getContext('2d');
     
     // Scale canvas context for device pixel ratio and render scale
     ctx.scale(dpr * renderScale, dpr * renderScale);
