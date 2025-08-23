@@ -99,8 +99,8 @@ body {
 
 .player-label {
     font-weight: 400;
-    font-size: 0.7rem;
-    min-width: 100px;
+    font-size: 1.5rem;
+    min-width: 40px;
 }
 
 /* Energy bar styles */
