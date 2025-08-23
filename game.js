@@ -1757,23 +1757,9 @@ function resizeCanvas() {
     const gameArea = document.querySelector('.game-area');
     const container = document.querySelector('.game-container');
     
-    // Get actual available space from the game-area element
-    // Maximize canvas size
-    let availableWidth, availableHeight;
-    
-    if (gameArea && gameArea.offsetWidth > 0) {
-        availableWidth = gameArea.offsetWidth - 20;
-        availableHeight = gameArea.offsetHeight - 10;
-    } else {
-        // Fallback to viewport dimensions
-        // Use most of the viewport
-        availableWidth = window.innerWidth * 0.9;
-        availableHeight = window.innerHeight * 0.65; // Leave room for header and controls
-    }
-    
-    // Ensure minimum reasonable size
-    availableWidth = Math.max(availableWidth, 400);
-    availableHeight = Math.max(availableHeight, 200);
+    // Get available space - using original working calculation
+    const availableWidth = gameArea.offsetWidth - 40; // Account for padding
+    const availableHeight = window.innerHeight - 300; // Account for header, controls, padding
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -1808,25 +1794,6 @@ function resizeCanvas() {
     // Update canvas display size (CSS)
     canvas.style.width = newWidth + 'px';
     canvas.style.height = newHeight + 'px';
-    
-    // Debug logging
-    console.log('Canvas resized:', {
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-        gameAreaWidth: gameArea ? gameArea.offsetWidth : 'null',
-        gameAreaHeight: gameArea ? gameArea.offsetHeight : 'null',
-        availableWidth,
-        availableHeight,
-        newWidth,
-        newHeight,
-        canvasWidth: canvas.width,
-        canvasHeight: canvas.height,
-        displayWidth: canvas.style.width,
-        displayHeight: canvas.style.height,
-        renderScale,
-        dpr,
-        userAgent: navigator.userAgent
-    });
     
     // Redraw if game is not running
     if (!game.running) {
