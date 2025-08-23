@@ -91,7 +91,13 @@
         </div>
         
         <div class="game-controls">
-            <button id="startBtn" class="btn">Start Adventure</button>
+            <div id="difficultyButtons" class="difficulty-selector">
+                <button class="btn difficulty-btn" data-difficulty="beginner">🌱 Beginner</button>
+                <button class="btn difficulty-btn" data-difficulty="intermediate">🌿 Intermediate</button>
+                <button class="btn difficulty-btn" data-difficulty="expert">🔥 Expert</button>
+                <button class="btn difficulty-btn" data-difficulty="berserker">💀 Berserker</button>
+            </div>
+            <button id="startBtn" class="btn" style="display: none;">Start Adventure</button>
             <button id="multiplayerBtn" class="btn">Single Player</button>
             <div class="instructions">
                 <p id="instructionText">Help Oregon Bunny hop to Oregon! Use arrow keys ↑ ↓ ← → to hop in any direction</p>

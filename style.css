@@ -33,6 +33,8 @@ body {
 .game-header {
     text-align: center;
     margin-bottom: 20px;
+    position: relative;
+    z-index: 10;
 }
 
 .game-header h1 {
@@ -73,6 +75,8 @@ body {
     font-size: 0.7rem;
     max-width: 800px;
     margin: 0 auto;
+    position: relative;
+    z-index: 10;
 }
 
 .stat {
@@ -192,6 +196,31 @@ body {
 .game-controls {
     text-align: center;
     margin-top: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Difficulty selector */
+.difficulty-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.difficulty-btn {
+    padding: 8px 15px;
+    font-size: 0.7rem;
+    min-width: 120px;
+}
+
+@media (max-width: 768px) {
+    .difficulty-btn {
+        padding: 6px 10px;
+        font-size: 0.6rem;
+        min-width: 100px;
+    }
 }
 
 .btn {
@@ -239,7 +268,10 @@ body {
     width: 100%;
     flex: 1;
     min-height: 0;
+    position: relative;
+    z-index: 1;
 }
+
 
 /* Mobile controls */
 .mobile-controls {

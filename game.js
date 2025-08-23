@@ -110,6 +110,34 @@ const CharacterSystem = {
     }
 };
 
+// Difficulty Settings
+const difficultySettings = {
+    beginner: {
+        speed: 1.5,
+        spawnMultiplier: 1.5, // Higher = slower spawns
+        energyDrainMultiplier: 0.7,
+        label: '🌱 Beginner'
+    },
+    intermediate: {
+        speed: 2,
+        spawnMultiplier: 1,
+        energyDrainMultiplier: 1,
+        label: '🌿 Intermediate'
+    },
+    expert: {
+        speed: 3,
+        spawnMultiplier: 0.75,
+        energyDrainMultiplier: 1.3,
+        label: '🔥 Expert'
+    },
+    berserker: {
+        speed: 4,
+        spawnMultiplier: 0.5,
+        energyDrainMultiplier: 1.6,
+        label: '💀 Berserker'
+    }
+};
+
 // Game State
 const game = {
     running: false,
@@ -119,6 +147,7 @@ const game = {
     gravity: 0.5,
     backgroundX: 0,
     multiplayer: false,
+    difficulty: 'intermediate', // Current difficulty setting
     carrotSpawnTimer: 0,
     carrotSpawnInterval: 120, // frames between carrot spawns
     fishSpawnTimer: 60, // offset fish spawning
@@ -1879,14 +1908,16 @@ function gameLoop() {
         orangeCat.update();
     }
     
-    // Decrease energy over time (hunger)
+    // Decrease energy over time (hunger) - affected by difficulty
+    const energyDrain = 0.05 * difficultySettings[game.difficulty].energyDrainMultiplier;
+    
     if (player1Stats.energy > 0) {
-        player1Stats.energy -= 0.05;
+        player1Stats.energy -= energyDrain;
         player1Stats.energy = Math.max(0, player1Stats.energy);
     }
     
     if (game.multiplayer && player2Stats.energy > 0) {
-        player2Stats.energy -= 0.05;
+        player2Stats.energy -= energyDrain;
         player2Stats.energy = Math.max(0, player2Stats.energy);
     }
     
@@ -1895,13 +1926,17 @@ function gameLoop() {
         if (player1Stats.energy <= 0 && player2Stats.energy <= 0) {
             game.gameOver = true;
             game.running = false;
-            document.getElementById('startBtn').textContent = 'Start Adventure';
+            // Show difficulty buttons again
+            document.getElementById('difficultyButtons').style.display = 'flex';
+            document.getElementById('startBtn').style.display = 'none';
         }
     } else {
         if (player1Stats.energy <= 0) {
             game.gameOver = true;
             game.running = false;
-            document.getElementById('startBtn').textContent = 'Start Adventure';
+            // Show difficulty buttons again
+            document.getElementById('difficultyButtons').style.display = 'flex';
+            document.getElementById('startBtn').style.display = 'none';
         }
     }
     
@@ -2090,10 +2125,36 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Start game
-document.getElementById('startBtn').addEventListener('click', () => {
+// Old start button handler removed - now handled by difficulty buttons and stop/resume button
+
+// Difficulty button handlers
+document.querySelectorAll('.difficulty-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const difficulty = e.target.dataset.difficulty;
+        startGameWithDifficulty(difficulty);
+    });
+});
+
+// Function to start game with selected difficulty
+function startGameWithDifficulty(difficulty) {
     if (!game.running || game.gameOver) {
-        // If game over, reset everything
+        // Set the difficulty
+        game.difficulty = difficulty;
+        const settings = difficultySettings[difficulty];
+        
+        // Apply difficulty settings
+        game.speed = settings.speed;
+        game.carrotSpawnInterval = Math.floor(120 * settings.spawnMultiplier);
+        game.fishSpawnInterval = Math.floor(120 * settings.spawnMultiplier);
+        game.vehicleSpawnInterval = Math.floor(90 * settings.spawnMultiplier);
+        game.sootSpriteSpawnInterval = Math.floor(600 * settings.spawnMultiplier);
+        
+        // Hide difficulty buttons, show stop button
+        document.getElementById('difficultyButtons').style.display = 'none';
+        document.getElementById('startBtn').style.display = 'inline-block';
+        document.getElementById('startBtn').textContent = 'Stop Adventure';
+        
+        // Reset and start the game
         if (game.gameOver) {
             game.gameOver = false;
             game.distance = 0;
@@ -2107,104 +2168,119 @@ document.getElementById('startBtn').addEventListener('click', () => {
             vehicles.length = 0;
             sootSprites.length = 0;
             
-            // Initialize clouds with persistent data
-            game.clouds = [];
-            for (let i = 0; i < 3; i++) {
-                game.clouds.push({
-                    x: i * 300,
-                    y: 20 + i * 25,
-                    circles: []
-                });
-                // Generate random circles for each cloud
-                for (let j = 0; j < 5; j++) {
-                    game.clouds[i].circles.push({
-                        offsetX: j * 15 - 10,
-                        offsetY: Math.sin(j) * 8,
-                        radius: 20 + Math.random() * 10
-                    });
-                }
-            }
-            
-            // Initialize stars for dark mode
-            game.stars = [];
-            for (let i = 0; i < 50; i++) {
-                game.stars.push({
-                    x: Math.random() * 800,
-                    y: Math.random() * 140,
-                    size: Math.random() * 2 + 0.5,
-                    brightness: Math.random() * 0.8 + 0.2,
-                    twinkleSpeed: Math.random() * 2 + 0.5,
-                    twinkleOffset: Math.random() * Math.PI * 2
-                });
-            }
-            
-            
-            // Initialize ground patches with random distribution
-            game.groundPatches = [];
-            for (let i = 0; i < 30; i++) {
-                game.groundPatches.push({
-                    x: Math.random() * 1500,
-                    y: 160 + Math.random() * 180, // Random Y within path area
-                    rotation: Math.random() * Math.PI
-                });
-            }
-            
-            // Initialize grass patches with random distribution
-            game.grassPatches = [];
-            for (let i = 0; i < 25; i++) {
-                game.grassPatches.push({
-                    x: Math.random() * 1500,
-                    y: 155 + Math.random() * 190 // Random Y within path area
-                });
-            }
-            
-            // Initialize flowers with random distribution
-            game.flowers = [];
-            const flowerColors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA07A', '#98FB98', '#DDA0DD', '#87CEEB'];
-            for (let i = 0; i < 40; i++) { // More flowers for better coverage
-                const type = Math.floor(Math.random() * flowerColors.length);
-                game.flowers.push({
-                    x: Math.random() * 2000, // Random position across a wide area
-                    type: type,
-                    petalColor: flowerColors[type],
-                    yOffset: Math.random() * 10 - 5 // Small random Y offset for natural look
-                });
-            }
-            
-            // Reset character positions and states
-            bunny.x = 100;
-            bunny.y = 260;
-            bunny.targetX = bunny.x;
-            bunny.targetY = bunny.y;
-            bunny.invulnerable = false;
-            bunny.invulnerableTimer = 0;
-            orangeCat.x = 100;
-            orangeCat.y = 210;
-            orangeCat.targetX = orangeCat.x;
-            orangeCat.targetY = orangeCat.y;
-            orangeCat.invulnerable = false;
-            orangeCat.invulnerableTimer = 0;
+            // Re-initialize all the persistent game elements (clouds, stars, etc.)
+            initializeGameElements();
         }
         
         game.running = true;
-        document.getElementById('startBtn').textContent = 'Pause';
+        
         // Reset game state for new game
         if (game.distance === 0) {
             player1Stats.carrots = 0;
             player1Stats.energy = 100;
             player2Stats.fish = 0;
             player2Stats.energy = 100;
-            carrots.length = 0; // Clear all carrots
-            fish.length = 0; // Clear all fish
-            vehicles.length = 0; // Clear all vehicles
-            sootSprites.length = 0; // Clear all soot sprites
+            bunny.x = 100;
+            bunny.y = 260;
+            bunny.targetX = 100;
+            bunny.targetY = 260;
+            orangeCat.x = 100;
+            orangeCat.y = 210;
+            orangeCat.targetX = 100;
+            orangeCat.targetY = 210;
         }
+        
         gameLoop();
-    } else {
+    }
+}
+
+// Update the stop button handler
+document.getElementById('startBtn').addEventListener('click', () => {
+    if (game.running) {
         game.running = false;
         document.getElementById('startBtn').textContent = 'Resume';
+    } else if (document.getElementById('startBtn').textContent === 'Resume') {
+        game.running = true;
+        document.getElementById('startBtn').textContent = 'Stop Adventure';
+        gameLoop();
     }
 });
+
+// Function to initialize game elements
+function initializeGameElements() {
+    // Initialize clouds with persistent data
+    game.clouds = [];
+    for (let i = 0; i < 3; i++) {
+        game.clouds.push({
+            x: i * 300,
+            y: 20 + i * 25,
+            circles: []
+        });
+        // Generate random circles for each cloud
+        for (let j = 0; j < 5; j++) {
+            game.clouds[i].circles.push({
+                offsetX: j * 15 - 10,
+                offsetY: Math.sin(j) * 8,
+                radius: 20 + Math.random() * 10
+            });
+        }
+    }
+    
+    // Initialize stars for dark mode
+    game.stars = [];
+    for (let i = 0; i < 50; i++) {
+        game.stars.push({
+            x: Math.random() * 800,
+            y: Math.random() * 140,
+            size: Math.random() * 2 + 0.5,
+            brightness: Math.random() * 0.8 + 0.2,
+            twinkleSpeed: Math.random() * 2 + 0.5,
+            twinkleOffset: Math.random() * Math.PI * 2
+        });
+    }
+    
+    // Initialize ground patches
+    game.groundPatches = [];
+    for (let i = 0; i < 20; i++) {
+        game.groundPatches.push({
+            x: Math.random() * 800,
+            y: 150 + Math.random() * 180,
+            width: 20 + Math.random() * 40,
+            height: 5 + Math.random() * 10
+        });
+    }
+    
+    // Initialize grass patches
+    game.grassPatches = [];
+    for (let i = 0; i < 30; i++) {
+        game.grassPatches.push({
+            x: Math.random() * 800,
+            y: 140 + Math.random() * 200,
+            blades: []
+        });
+        for (let j = 0; j < 3 + Math.random() * 4; j++) {
+            game.grassPatches[i].blades.push({
+                offsetX: j * 2 - 3,
+                height: 5 + Math.random() * 10,
+                sway: Math.random() * Math.PI
+            });
+        }
+    }
+    
+    // Initialize flowers
+    game.flowers = [];
+    for (let i = 0; i < 15; i++) {
+        const flowerColors = ['#FFB6C1', '#FF69B4', '#FFD700', '#87CEEB', '#DDA0DD'];
+        game.flowers.push({
+            x: Math.random() * 800,
+            y: 145 + Math.random() * 190,
+            color: flowerColors[Math.floor(Math.random() * flowerColors.length)],
+            petals: 5 + Math.floor(Math.random() * 3),
+            size: 3 + Math.random() * 2,
+            stemHeight: 10 + Math.random() * 5
+        });
+    }
+}
 
 // Multiplayer toggle
 document.getElementById('multiplayerBtn').addEventListener('click', () => {
