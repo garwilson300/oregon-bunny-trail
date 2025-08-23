@@ -130,7 +130,8 @@ const game = {
     clouds: [], // Persistent cloud data
     groundPatches: [], // Persistent ground texture patches
     grassPatches: [], // Persistent grass patches
-    flowers: [] // Persistent flower data
+    flowers: [], // Persistent flower data
+    stars: [] // Persistent star data for dark mode
 };
 
 // Player stats
@@ -1050,6 +1051,11 @@ function drawBackground() {
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, 800, 150);
     
+    // Draw stars in dark mode (behind everything else)
+    if (isDarkMode() && game.stars && game.stars.length > 0) {
+        drawStars();
+    }
+    
     // Rolling hills in background (multiple layers for depth)
     // Far hills
     ctx.fillStyle = isDarkMode() ? '#2c4a5a' : '#A8D5BA';
@@ -1194,6 +1200,46 @@ function drawBackground() {
     }
     
     // Soot sprites are now collectible items, handled in the game loop
+}
+
+// Draw stars in the night sky
+function drawStars() {
+    ctx.save();
+    
+    for (let star of game.stars) {
+        // Calculate star position with parallax effect
+        let starX = ((star.x - game.backgroundX * 0.02) % 800 + 800) % 800;
+        
+        // Twinkling effect
+        const twinkle = Math.sin(Date.now() * 0.001 * star.twinkleSpeed + star.twinkleOffset) * 0.5 + 0.5;
+        const opacity = star.brightness * (0.5 + twinkle * 0.5);
+        
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.beginPath();
+        
+        // Draw star shape
+        if (star.size > 1.5) {
+            // Larger stars get a sparkle effect
+            const size = star.size * twinkle;
+            ctx.arc(starX, star.y, size, 0, Math.PI * 2);
+            ctx.fill();
+            // Add sparkle cross
+            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.5})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(starX - size * 2, star.y);
+            ctx.lineTo(starX + size * 2, star.y);
+            ctx.moveTo(starX, star.y - size * 2);
+            ctx.lineTo(starX, star.y + size * 2);
+            ctx.stroke();
+        } else {
+            // Smaller stars are just circles
+            ctx.arc(starX, star.y, star.size * twinkle, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    ctx.restore();
 }
 
 // Draw Totoro-style fluffy cloud
@@ -1676,6 +1722,19 @@ document.getElementById('startBtn').addEventListener('click', () => {
                 }
             }
             
+            // Initialize stars for dark mode
+            game.stars = [];
+            for (let i = 0; i < 50; i++) {
+                game.stars.push({
+                    x: Math.random() * 800,
+                    y: Math.random() * 140,
+                    size: Math.random() * 2 + 0.5,
+                    brightness: Math.random() * 0.8 + 0.2,
+                    twinkleSpeed: Math.random() * 2 + 0.5,
+                    twinkleOffset: Math.random() * Math.PI * 2
+                });
+            }
+            
             
             // Initialize ground patches with random distribution
             game.groundPatches = [];
@@ -1883,6 +1942,19 @@ for (let i = 0; i < 3; i++) {
             radius: 20 + Math.random() * 10
         });
     }
+}
+
+// Initialize stars for dark mode
+game.stars = [];
+for (let i = 0; i < 50; i++) {
+    game.stars.push({
+        x: Math.random() * 800,
+        y: Math.random() * 140, // Keep stars in the sky area
+        size: Math.random() * 2 + 0.5,
+        brightness: Math.random() * 0.8 + 0.2,
+        twinkleSpeed: Math.random() * 2 + 0.5,
+        twinkleOffset: Math.random() * Math.PI * 2
+    });
 }
 
 
