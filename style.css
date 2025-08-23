@@ -243,7 +243,7 @@ body {
 
 /* Mobile controls */
 .mobile-controls {
-    display: none;
+    display: none !important; /* Force hide by default */
     justify-content: center;
     align-items: center;
 }
@@ -299,10 +299,10 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Show mobile controls on touch devices (but not Xbox/TV) */
-@media (pointer: coarse) and (max-width: 1024px), (any-pointer: coarse) and (max-width: 1024px) {
+/* Show mobile controls ONLY on small touch devices (phones/tablets) */
+@media (max-width: 768px) and (pointer: coarse) {
     .mobile-controls {
-        display: flex;
+        display: flex !important;
     }
     
     .instructions p {
@@ -586,8 +586,8 @@ body {
     }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive - for actual mobile devices */
+@media (max-width: 768px) and (max-height: 600px) {
     .game-container {
         padding: 15px;
     }
