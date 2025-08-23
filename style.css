@@ -507,6 +507,66 @@ body {
     border-color: #64b5f6;
 }
 
+/* Xbox/TV specific optimizations - for TV displays (even at lower reported resolutions) */
+@media (min-width: 1200px), (min-device-width: 1200px), (min-width: 1024px) and (min-height: 700px) {
+    .game-header {
+        margin-bottom: 5px;
+    }
+    
+    .game-header h1 {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+    }
+    
+    .distance-bar {
+        padding: 5px;
+        margin: 0 auto 5px;
+    }
+    
+    .distance-label {
+        font-size: 0.7rem;
+    }
+    
+    .game-stats {
+        gap: 15px;
+        font-size: 0.6rem;
+        margin-bottom: 5px;
+    }
+    
+    .stat {
+        padding: 5px 8px;
+    }
+    
+    .energy-bar-container {
+        padding: 5px 8px;
+    }
+    
+    .energy-label {
+        font-size: 0.6rem;
+    }
+    
+    .game-area {
+        margin: 5px 0;
+    }
+    
+    .game-controls {
+        margin-top: 5px;
+    }
+    
+    .btn {
+        padding: 8px 20px;
+        font-size: 0.7rem;
+    }
+    
+    .instructions {
+        margin-top: 5px;
+    }
+    
+    .instructions p {
+        font-size: 0.5rem;
+    }
+}
+
 /* Show portrait message on mobile in portrait orientation */
 @media (max-width: 768px) and (orientation: portrait) {
     .portrait-message {
