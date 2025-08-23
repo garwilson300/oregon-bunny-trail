@@ -1013,10 +1013,8 @@ function drawBackground() {
     ctx.fillStyle = '#7A6449';
     if (game.groundPatches && game.groundPatches.length > 0) {
         for (let patch of game.groundPatches) {
-            // Use proper wrapping to ensure continuous display
-            let baseX = patch.x - (game.backgroundX * 0.5);
-            let patchX = baseX % 1200;
-            if (patchX < -100) patchX += 1200;
+            // Scroll right to left with the background
+            let patchX = ((patch.x + game.backgroundX * 0.5) % 1500 + 1500) % 1500 - 100;
             
             if (patchX > -50 && patchX < 850) {
                 ctx.beginPath();
@@ -1030,10 +1028,8 @@ function drawBackground() {
     ctx.fillStyle = '#6B8E23';
     if (game.grassPatches && game.grassPatches.length > 0) {
         for (let patch of game.grassPatches) {
-            // Use proper wrapping to ensure continuous display
-            let baseX = patch.x - (game.backgroundX * 0.7);
-            let grassX = baseX % 1200;
-            if (grassX < -100) grassX += 1200;
+            // Scroll right to left with the background
+            let grassX = ((patch.x + game.backgroundX * 0.7) % 1500 + 1500) % 1500 - 100;
             
             if (grassX > -20 && grassX < 820) {
                 ctx.beginPath();
@@ -1054,13 +1050,12 @@ function drawBackground() {
         // Wildflowers (use persistent flower data)
         if (game.flowers && game.flowers.length > 0) {
             for (let flower of game.flowers) {
-                // Use proper wrapping to ensure continuous display
-                let baseX = flower.x + (side * 35) - (game.backgroundX * 0.8);
-                let flowerX = baseX % 1680;
-                if (flowerX < -100) flowerX += 1680;
+                // Scroll right to left with the background
+                let flowerX = ((flower.x + (side * 35) + game.backgroundX * 0.8) % 2000 + 2000) % 2000 - 100;
                 
                 if (flowerX > -20 && flowerX < 820) {
-                    drawWildflower(flowerX, y + (side === 0 ? -8 : 8), flower.type, flower.petalColor);
+                    const yPos = y + (side === 0 ? -8 : 8) + (flower.yOffset || 0);
+                    drawWildflower(flowerX, yPos, flower.type, flower.petalColor);
                 }
             }
         }
@@ -1552,32 +1547,35 @@ document.getElementById('startBtn').addEventListener('click', () => {
             }
             
             
-            // Initialize ground patches
+            // Initialize ground patches with random distribution
             game.groundPatches = [];
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 30; i++) {
                 game.groundPatches.push({
-                    x: i * 60,
-                    y: 180 + i * 15,
+                    x: Math.random() * 1500,
+                    y: 160 + Math.random() * 180, // Random Y within path area
                     rotation: Math.random() * Math.PI
                 });
             }
             
-            // Initialize grass patches
+            // Initialize grass patches with random distribution
             game.grassPatches = [];
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 25; i++) {
                 game.grassPatches.push({
-                    x: i * 80,
-                    y: 160 + i * 20
+                    x: Math.random() * 1500,
+                    y: 155 + Math.random() * 190 // Random Y within path area
                 });
             }
             
-            // Initialize flowers
+            // Initialize flowers with random distribution
             game.flowers = [];
-            for (let i = 0; i < 24; i++) {
+            const flowerColors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA07A', '#98FB98', '#DDA0DD', '#87CEEB'];
+            for (let i = 0; i < 40; i++) { // More flowers for better coverage
+                const type = Math.floor(Math.random() * flowerColors.length);
                 game.flowers.push({
-                    x: i * 70,
-                    type: i % 3,
-                    petalColor: ['#FF69B4', '#FFD700', '#9370DB'][i % 3]
+                    x: Math.random() * 2000, // Random position across a wide area
+                    type: type,
+                    petalColor: flowerColors[type],
+                    yOffset: Math.random() * 10 - 5 // Small random Y offset for natural look
                 });
             }
             
@@ -1758,32 +1756,35 @@ for (let i = 0; i < 3; i++) {
 }
 
 
-// Initialize ground patches
+// Initialize ground patches with random distribution
 game.groundPatches = [];
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 30; i++) {
     game.groundPatches.push({
-        x: i * 60,
-        y: 180 + i * 15,
+        x: Math.random() * 1500,
+        y: 160 + Math.random() * 180, // Random Y within path area
         rotation: Math.random() * Math.PI
     });
 }
 
-// Initialize grass patches
+// Initialize grass patches with random distribution
 game.grassPatches = [];
-for (let i = 0; i < 15; i++) {
+for (let i = 0; i < 25; i++) {
     game.grassPatches.push({
-        x: i * 80,
-        y: 160 + i * 20
+        x: Math.random() * 1500,
+        y: 155 + Math.random() * 190 // Random Y within path area
     });
 }
 
-// Initialize flowers
+// Initialize flowers with random distribution
 game.flowers = [];
-for (let i = 0; i < 24; i++) {
+const flowerColors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA07A', '#98FB98', '#DDA0DD', '#87CEEB'];
+for (let i = 0; i < 40; i++) { // More flowers for better coverage
+    const type = Math.floor(Math.random() * flowerColors.length);
     game.flowers.push({
-        x: i * 70,
-        type: i % 3,
-        petalColor: ['#FF69B4', '#FFD700', '#9370DB'][i % 3]
+        x: Math.random() * 2000, // Random position across a wide area
+        type: type,
+        petalColor: flowerColors[type],
+        yOffset: Math.random() * 10 - 5 // Small random Y offset for natural look
     });
 }
 
