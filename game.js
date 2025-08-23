@@ -1757,12 +1757,9 @@ function resizeCanvas() {
     const gameArea = document.querySelector('.game-area');
     const container = document.querySelector('.game-container');
     
-    // Get available space - adjust for TV displays (including 60" TVs)
-    // Xbox on TV might report various resolutions depending on TV settings
-    const isLargeScreen = window.innerWidth >= 1024 && window.innerHeight >= 700;
+    // Get available space - using original working calculation
     const availableWidth = gameArea.offsetWidth - 40; // Account for padding
-    // Use less reserved space on TV displays since we compacted the UI
-    const availableHeight = window.innerHeight - (isLargeScreen ? 180 : 300); // Even less space needed on TV
+    const availableHeight = window.innerHeight - 300; // Account for header, controls, padding
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -1797,16 +1794,6 @@ function resizeCanvas() {
     // Update canvas display size (CSS)
     canvas.style.width = newWidth + 'px';
     canvas.style.height = newHeight + 'px';
-    
-    // Log TV/Xbox detection
-    if (isLargeScreen) {
-        console.log('TV/Large screen detected:', {
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight,
-            availableHeight,
-            canvasSize: { width: newWidth, height: newHeight }
-        });
-    }
     
     // Redraw if game is not running
     if (!game.running) {
