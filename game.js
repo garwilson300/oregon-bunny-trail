@@ -1758,9 +1758,9 @@ function resizeCanvas() {
     const container = document.querySelector('.game-container');
     
     // Get actual available space from the game-area element
-    const availableWidth = gameArea ? gameArea.offsetWidth - 20 : window.innerWidth - 40;
+    const availableWidth = gameArea ? Math.max(gameArea.offsetWidth - 40, 400) : window.innerWidth - 40;
     // Use the actual height of the game-area instead of fixed offset
-    const availableHeight = gameArea ? gameArea.offsetHeight - 20 : window.innerHeight - 100;
+    const availableHeight = gameArea ? Math.max(gameArea.offsetHeight - 40, 200) : window.innerHeight - 100;
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -1815,11 +1815,11 @@ window.addEventListener('resize', () => {
     }, 100);
 });
 
+// Initialize theme on page load (must be before canvas resize)
+initTheme();
+
 // Initial setup
 resizeCanvas();
-
-// Initialize theme on page load
-initTheme();
 
 // Initialize clouds on page load
 game.clouds = [];
