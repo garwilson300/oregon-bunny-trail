@@ -1013,8 +1013,8 @@ function drawBackground() {
     ctx.fillStyle = '#7A6449';
     if (game.groundPatches && game.groundPatches.length > 0) {
         for (let patch of game.groundPatches) {
-            // Scroll right to left with the background (subtract because backgroundX is negative)
-            let patchX = ((patch.x - game.backgroundX * 0.5) % 1500 + 1500) % 1500 - 100;
+            // Scroll right to left with the background (add like other elements)
+            let patchX = ((game.backgroundX * 0.5 + patch.x) % 1500 + 1500) % 1500 - 100;
             
             if (patchX > -50 && patchX < 850) {
                 ctx.beginPath();
@@ -1028,8 +1028,8 @@ function drawBackground() {
     ctx.fillStyle = '#6B8E23';
     if (game.grassPatches && game.grassPatches.length > 0) {
         for (let patch of game.grassPatches) {
-            // Scroll right to left with the background (subtract because backgroundX is negative)
-            let grassX = ((patch.x - game.backgroundX * 0.7) % 1500 + 1500) % 1500 - 100;
+            // Scroll right to left with the background (add like other elements)
+            let grassX = ((game.backgroundX * 0.7 + patch.x) % 1500 + 1500) % 1500 - 100;
             
             if (grassX > -20 && grassX < 820) {
                 ctx.beginPath();
@@ -1050,8 +1050,8 @@ function drawBackground() {
         // Wildflowers (use persistent flower data)
         if (game.flowers && game.flowers.length > 0) {
             for (let flower of game.flowers) {
-                // Scroll right to left with the background (subtract because backgroundX is negative)
-                let flowerX = ((flower.x + (side * 35) - game.backgroundX * 0.8) % 2000 + 2000) % 2000 - 100;
+                // Scroll right to left with the background (add like other elements)
+                let flowerX = ((game.backgroundX * 0.8 + flower.x + (side * 35)) % 2000 + 2000) % 2000 - 100;
                 
                 if (flowerX > -20 && flowerX < 820) {
                     const yPos = y + (side === 0 ? -8 : 8) + (flower.yOffset || 0);
