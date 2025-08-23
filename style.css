@@ -265,9 +265,6 @@ body {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     transition: var(--transition);
-    width: 100%;
-    max-width: 800px;
-    height: auto;
 }
 
 .game-controls {

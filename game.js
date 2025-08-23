@@ -1796,6 +1796,18 @@ function resizeCanvas() {
     canvas.style.width = newWidth + 'px';
     canvas.style.height = newHeight + 'px';
     
+    // Debug logging
+    console.log('Canvas resized:', {
+        availableWidth,
+        availableHeight,
+        newWidth,
+        newHeight,
+        canvasWidth: canvas.width,
+        canvasHeight: canvas.height,
+        renderScale,
+        dpr
+    });
+    
     // Redraw if game is not running
     if (!game.running) {
         drawBackground();
@@ -1817,9 +1829,6 @@ window.addEventListener('resize', () => {
 
 // Initialize theme on page load (must be before canvas resize)
 initTheme();
-
-// Initial setup
-resizeCanvas();
 
 // Initialize clouds on page load
 game.clouds = [];
@@ -1872,8 +1881,12 @@ for (let i = 0; i < 40; i++) { // More flowers for better coverage
     });
 }
 
-drawBackground();
-bunny.draw();
+// Initial canvas setup and draw - delay to ensure DOM is ready
+setTimeout(() => {
+    resizeCanvas();
+    drawBackground();
+    bunny.draw();
+}, 50);
 
 // Simple focus management - canvas doesn't need focus for document-level key events
 // Just prevent scrolling on arrow keys which is handled in the keydown listener
