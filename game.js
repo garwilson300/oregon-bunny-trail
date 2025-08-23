@@ -1487,8 +1487,8 @@ function drawBackground() {
         const scrollOffset = game.backgroundX * 0.3;
         const basePosition = i * treeSpacing;
         
-        // Calculate tree position with proper wrapping
-        let treeX = basePosition - scrollOffset;
+        // Calculate tree position with proper wrapping (add scroll offset since backgroundX is negative)
+        let treeX = basePosition + scrollOffset;
         
         // Wrap trees around when they go off screen
         while (treeX < -100) {
