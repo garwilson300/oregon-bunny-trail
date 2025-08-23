@@ -628,10 +628,11 @@ class Carrot {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.width = 30;
-        this.height = 35;
+        this.width = 18;  // Smaller size
+        this.height = 20; // Smaller size
         this.collected = false;
         this.bobOffset = Math.random() * Math.PI * 2; // Random starting position for bobbing
+        this.rotateAngle = 0; // For cute rotation animation
     }
     
     update() {
@@ -640,48 +641,66 @@ class Carrot {
         
         // Gentle bobbing motion
         this.y += Math.sin(Date.now() * 0.003 + this.bobOffset) * 0.5;
+        
+        // Cute rotation animation
+        this.rotateAngle = Math.sin(Date.now() * 0.002 + this.bobOffset) * 0.1;
     }
     
     draw() {
         ctx.save();
         
-        // Carrot body (orange triangle)
-        ctx.fillStyle = '#FF6B35';
+        // Apply cute rotation
+        ctx.translate(this.x + this.width/2, this.y + this.height/2);
+        ctx.rotate(this.rotateAngle);
+        ctx.translate(-(this.x + this.width/2), -(this.y + this.height/2));
+        
+        // Cute carrot body (rounded cone shape)
+        const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+        gradient.addColorStop(0, '#FF8C42');
+        gradient.addColorStop(1, '#FF6B35');
+        ctx.fillStyle = gradient;
+        
+        // Draw rounded carrot shape
         ctx.beginPath();
-        ctx.moveTo(this.x + this.width/2, this.y + this.height);
-        ctx.lineTo(this.x + 5, this.y + 10);
-        ctx.lineTo(this.x + this.width - 5, this.y + 10);
-        ctx.closePath();
+        ctx.ellipse(this.x + this.width/2, this.y + 8, this.width/2.5, 6, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Carrot top (wider part)
+        // Tapered bottom part
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2, this.y + 10, this.width/2 - 2, 5, 0, 0, Math.PI * 2);
+        ctx.moveTo(this.x + this.width/2 - 6, this.y + 8);
+        ctx.quadraticCurveTo(this.x + this.width/2 - 4, this.y + 12, this.x + this.width/2, this.y + this.height);
+        ctx.quadraticCurveTo(this.x + this.width/2 + 4, this.y + 12, this.x + this.width/2 + 6, this.y + 8);
         ctx.fill();
         
-        // Carrot lines
-        ctx.strokeStyle = '#E55100';
-        ctx.lineWidth = 1;
+        // Cute detail lines
+        ctx.strokeStyle = 'rgba(229, 81, 0, 0.5)';
+        ctx.lineWidth = 0.5;
         ctx.beginPath();
-        ctx.moveTo(this.x + 10, this.y + 15);
-        ctx.lineTo(this.x + 12, this.y + 25);
-        ctx.moveTo(this.x + 20, this.y + 15);
-        ctx.lineTo(this.x + 18, this.y + 25);
+        ctx.moveTo(this.x + this.width/2 - 2, this.y + 10);
+        ctx.lineTo(this.x + this.width/2 - 1, this.y + 14);
+        ctx.moveTo(this.x + this.width/2 + 2, this.y + 10);
+        ctx.lineTo(this.x + this.width/2 + 1, this.y + 14);
         ctx.stroke();
         
-        // Green leaves
-        ctx.fillStyle = '#228B22';
+        // Cute green leaves (smaller and more stylized)
+        ctx.fillStyle = '#4CAF50';
+        // Center leaf
         ctx.beginPath();
-        // Leaf 1
-        ctx.ellipse(this.x + this.width/2 - 5, this.y + 5, 3, 8, -0.3, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2, this.y + 4, 2, 5, 0, 0, Math.PI * 2);
         ctx.fill();
-        // Leaf 2
+        // Left leaf
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2, this.y + 3, 3, 10, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2 - 3, this.y + 5, 2, 4, -0.4, 0, Math.PI * 2);
         ctx.fill();
-        // Leaf 3
+        // Right leaf
         ctx.beginPath();
-        ctx.ellipse(this.x + this.width/2 + 5, this.y + 5, 3, 8, 0.3, 0, Math.PI * 2);
+        ctx.ellipse(this.x + this.width/2 + 3, this.y + 5, 2, 4, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add a tiny highlight for cuteness
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width/2 - 2, this.y + 9, 1.5, 2, -0.2, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.restore();
