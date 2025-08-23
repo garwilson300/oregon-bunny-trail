@@ -44,11 +44,35 @@ body {
     letter-spacing: 2px;
 }
 
+.distance-bar {
+    max-width: 800px;
+    margin: 0 auto 15px;
+    background: #4a8fc4;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.distance-label {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.distance-center {
+    display: flex;
+    align-items: center;
+}
+
 .game-stats {
     display: flex;
     justify-content: center;
     gap: 30px;
     font-size: 0.7rem;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .stat {
@@ -61,8 +85,10 @@ body {
 }
 
 .multiplayer-stats {
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 10px;
 }
 
 .player-stats {

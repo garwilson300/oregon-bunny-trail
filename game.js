@@ -1255,14 +1255,16 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     const instructions = document.getElementById('instructionText');
     const singleStats = document.getElementById('singlePlayerStats');
     const multiStats = document.getElementById('multiplayerStats');
+    const distanceBar = document.querySelector('.distance-bar');
     const player2Controls = document.querySelector('.player2-controls');
     
     if (game.multiplayer) {
         btn.textContent = 'Two Players';
         instructions.innerHTML = 'Player 1 (Bunny): Arrow keys ↑ ↓ ← → | Player 2 (Cat): WASD keys';
-        // Show multiplayer stats, hide single player stats
+        // Show multiplayer stats, hide single player stats and distance bar
         singleStats.style.display = 'none';
         multiStats.style.display = 'flex';
+        if (distanceBar) distanceBar.style.display = 'none';
         // Show player 2 mobile controls
         if (player2Controls) player2Controls.style.display = 'block';
         // Reset Orange Cat position
@@ -1276,9 +1278,10 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     } else {
         btn.textContent = 'Single Player';
         instructions.innerHTML = 'Help Oregon Bunny hop to Oregon! Use arrow keys ↑ ↓ ← → to hop in any direction';
-        // Show single player stats, hide multiplayer stats
+        // Show single player stats and distance bar, hide multiplayer stats
         singleStats.style.display = 'flex';
         multiStats.style.display = 'none';
+        if (distanceBar) distanceBar.style.display = 'block';
         // Hide player 2 mobile controls
         if (player2Controls) player2Controls.style.display = 'none';
         // Clear fish array when switching to single player
