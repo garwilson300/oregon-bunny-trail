@@ -4,23 +4,75 @@
     box-sizing: border-box;
 }
 
+:root {
+    /* Light theme colors */
+    --bg-gradient-start: #B8E6F5;
+    --bg-gradient-middle: #A8D5BA;
+    --bg-gradient-end: #7FB069;
+    --text-color: #333;
+    --text-light: #666;
+    --container-bg: rgba(255, 255, 255, 0.95);
+    --container-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --primary-color: #5a9fd4;
+    --primary-hover: #4a8fc4;
+    --secondary-color: #ffd700;
+    --border-color: #333;
+    --canvas-bg: #f0f8ff;
+    --canvas-border: #5a9fd4;
+    --distance-bar-bg: #4a8fc4;
+    --stat-bg: #ffd700;
+    --stat-color: #333;
+    --energy-bar-bg: #333;
+    --energy-bar-border: #000;
+    --btn-border: #333;
+    --portrait-bg-start: #87CEEB;
+    --portrait-bg-end: #98D8C8;
+    --transition: all 0.3s ease;
+}
+
+[data-theme="dark"] {
+    /* Dark theme colors */
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-middle: #16213e;
+    --bg-gradient-end: #0f3460;
+    --text-color: #e0e0e0;
+    --text-light: #aaa;
+    --container-bg: rgba(30, 30, 40, 0.95);
+    --container-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --primary-color: #64b5f6;
+    --primary-hover: #1e3a5f;
+    --secondary-color: #795548;
+    --border-color: #64b5f6;
+    --canvas-bg: #1a1a2e;
+    --canvas-border: #2e5090;
+    --distance-bar-bg: #1e3a5f;
+    --stat-bg: #795548;
+    --stat-color: #ffd700;
+    --energy-bar-bg: #1a1a1a;
+    --energy-bar-border: #444;
+    --btn-border: #64b5f6;
+    --portrait-bg-start: #1a1a2e;
+    --portrait-bg-end: #0f3460;
+}
+
 body {
     font-family: 'Press Start 2P', cursive;
-    background: linear-gradient(to bottom, #B8E6F5 0%, #A8D5BA 50%, #7FB069 100%);
+    background: linear-gradient(to bottom, var(--bg-gradient-start) 0%, var(--bg-gradient-middle) 50%, var(--bg-gradient-end) 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #333;
+    color: var(--text-color);
     margin: 0;
     padding: 10px;
+    transition: var(--transition);
 }
 
 .game-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--container-bg);
     border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--container-shadow);
     width: calc(100vw - 40px);
     max-width: calc(100vw - 40px);
     height: calc(100vh - 40px);
@@ -28,6 +80,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: var(--transition);
 }
 
 .game-header {
@@ -36,22 +89,32 @@ body {
 }
 
 .game-header h1 {
-    color: #5a9fd4;
+    color: var(--primary-color);
     font-size: 1.8rem;
     font-weight: 400;
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
     margin-bottom: 15px;
     letter-spacing: 2px;
+    transition: var(--transition);
+}
+
+[data-theme="dark"] .game-header h1 {
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.7);
 }
 
 .distance-bar {
     max-width: 800px;
     margin: 0 auto 15px;
-    background: #4a8fc4;
+    background: var(--distance-bar-bg);
     padding: 10px;
     border-radius: 5px;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+}
+
+[data-theme="dark"] .distance-bar {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .distance-label {
@@ -76,12 +139,18 @@ body {
 }
 
 .stat {
-    background: #ffd700;
+    background: var(--stat-bg);
+    color: var(--stat-color);
     padding: 8px 12px;
     border-radius: 5px;
     font-weight: 400;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     letter-spacing: 1px;
+    transition: var(--transition);
+}
+
+[data-theme="dark"] .stat {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .multiplayer-stats {
@@ -108,10 +177,15 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #ffd700;
+    background: var(--stat-bg);
     padding: 8px 12px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+}
+
+[data-theme="dark"] .energy-bar-container {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .energy-bar-container.small {
@@ -122,16 +196,19 @@ body {
     font-size: 0.7rem;
     font-weight: 400;
     letter-spacing: 1px;
+    color: var(--stat-color);
+    transition: var(--transition);
 }
 
 .energy-bar {
     width: 120px;
     height: 20px;
-    background: #333;
-    border: 2px solid #000;
+    background: var(--energy-bar-bg);
+    border: 2px solid var(--energy-bar-border);
     border-radius: 3px;
     overflow: hidden;
     position: relative;
+    transition: var(--transition);
 }
 
 .energy-bar-container.small .energy-bar {
@@ -178,15 +255,16 @@ body {
 }
 
 #gameCanvas {
-    border: 3px solid #5a9fd4;
+    border: 3px solid var(--canvas-border);
     border-radius: 10px;
     display: block;
     margin: 0 auto;
-    background: #f0f8ff;
+    background: var(--canvas-bg);
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    transition: var(--transition);
 }
 
 .game-controls {
@@ -195,15 +273,15 @@ body {
 }
 
 .btn {
-    background: #5a9fd4;
+    background: var(--primary-color);
     color: white;
-    border: 3px solid #333;
+    border: 3px solid var(--btn-border);
     padding: 10px 25px;
     font-size: 0.8rem;
     font-weight: 400;
     border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     font-family: 'Press Start 2P', cursive;
     margin: 0 10px;
     text-transform: uppercase;
@@ -211,7 +289,7 @@ body {
 }
 
 .btn:hover {
-    background: #4a8fc4;
+    background: var(--primary-hover);
     transform: scale(1.05);
 }
 
@@ -221,7 +299,8 @@ body {
 
 .instructions {
     margin-top: 15px;
-    color: #666;
+    color: var(--text-light);
+    transition: var(--transition);
 }
 
 .instructions p {
@@ -255,10 +334,11 @@ body {
 
 .control-label {
     font-weight: 400;
-    color: #5a9fd4;
+    color: var(--primary-color);
     margin-bottom: 10px;
     font-size: 0.6rem;
     letter-spacing: 1px;
+    transition: var(--transition);
 }
 
 .dpad {
@@ -274,7 +354,7 @@ body {
 }
 
 .dpad-btn {
-    background: #5a9fd4;
+    background: var(--primary-color);
     color: white;
     border: none;
     width: 50px;
@@ -293,10 +373,18 @@ body {
     user-select: none;
 }
 
+[data-theme="dark"] .dpad-btn {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
 .dpad-btn:active {
-    background: #4a8fc4;
+    background: var(--primary-hover);
     transform: scale(0.95);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .dpad-btn:active {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Show mobile controls on touch devices */
@@ -365,21 +453,22 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 100%);
+    background: linear-gradient(to bottom, var(--portrait-bg-start) 0%, var(--portrait-bg-end) 100%);
     z-index: 9999;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    color: #333;
+    color: var(--text-color);
     padding: 20px;
+    transition: var(--transition);
 }
 
 .portrait-message h2 {
     font-family: 'Press Start 2P', cursive;
     font-size: 1.2rem;
     margin: 20px 0;
-    color: #5a9fd4;
+    color: var(--primary-color);
     line-height: 1.8;
 }
 
@@ -403,6 +492,38 @@ body {
 @keyframes rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-color);
+    border: 2px solid var(--btn-border);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: var(--transition);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+[data-theme="dark"] .theme-toggle {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
 }
 
 /* Show portrait message on mobile in portrait orientation */

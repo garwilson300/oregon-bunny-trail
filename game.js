@@ -2,6 +2,50 @@
 const canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 
+// Theme Management
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const htmlElement = document.documentElement;
+
+// Check for saved theme preference or default to dark mode (better for gaming)
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    htmlElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+// Update theme icon based on current theme
+function updateThemeIcon(theme) {
+    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// Check if dark mode is active
+function isDarkMode() {
+    return htmlElement.getAttribute('data-theme') === 'dark';
+}
+
+// Toggle theme
+function toggleTheme() {
+    const currentTheme = htmlElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    htmlElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+    
+    // Redraw canvas with new theme if game is not running
+    if (!game.running) {
+        drawBackground();
+        bunny.draw();
+        if (game.multiplayer) {
+            orangeCat.draw();
+        }
+    }
+}
+
+// Add event listener for theme toggle
+themeToggle.addEventListener('click', toggleTheme);
+
 // Character Management System
 const CharacterSystem = {
     // Check if a character can perform actions (move, collect items, etc)
@@ -975,16 +1019,21 @@ const LANE_Y = [150, 200, 250, 300];
 
 // Draw background - Totoro inspired
 function drawBackground() {
-    // Sky gradient - soft Ghibli blue
+    // Sky gradient - soft Ghibli blue or night sky for dark mode
     const skyGradient = ctx.createLinearGradient(0, 0, 0, 150);
-    skyGradient.addColorStop(0, '#B8E6F5');
-    skyGradient.addColorStop(1, '#E8F5E9');
+    if (isDarkMode()) {
+        skyGradient.addColorStop(0, '#0f1729');
+        skyGradient.addColorStop(1, '#1a2544');
+    } else {
+        skyGradient.addColorStop(0, '#B8E6F5');
+        skyGradient.addColorStop(1, '#E8F5E9');
+    }
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, 800, 150);
     
     // Rolling hills in background (multiple layers for depth)
     // Far hills
-    ctx.fillStyle = '#A8D5BA';
+    ctx.fillStyle = isDarkMode() ? '#2c4a5a' : '#A8D5BA';
     ctx.beginPath();
     ctx.moveTo(0, 120);
     for (let x = 0; x <= 800; x += 50) {
@@ -997,7 +1046,7 @@ function drawBackground() {
     ctx.fill();
     
     // Mid hills
-    ctx.fillStyle = '#7FB069';
+    ctx.fillStyle = isDarkMode() ? '#1e3a4a' : '#7FB069';
     ctx.beginPath();
     ctx.moveTo(0, 130);
     for (let x = 0; x <= 800; x += 30) {
@@ -1010,7 +1059,7 @@ function drawBackground() {
     ctx.fill();
     
     // Fluffy Totoro-style clouds (drawn BEFORE trees so they appear behind)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillStyle = isDarkMode() ? 'rgba(200, 200, 220, 0.3)' : 'rgba(255, 255, 255, 0.9)';
     if (game.clouds && game.clouds.length > 0) {
         for (let i = 0; i < game.clouds.length; i++) {
             let cloudOffset = (game.backgroundX * 0.1 + game.clouds[i].x);
@@ -1029,11 +1078,11 @@ function drawBackground() {
     
     // Forest path instead of highway - dirt road with grass patches
     // Base dirt path
-    ctx.fillStyle = '#8B7355';
+    ctx.fillStyle = isDarkMode() ? '#2a2a3a' : '#8B7355';
     ctx.fillRect(0, 150, 800, 200);
     
     // Add texture to path (use persistent patches)
-    ctx.fillStyle = '#7A6449';
+    ctx.fillStyle = isDarkMode() ? '#1f1f2f' : '#7A6449';
     if (game.groundPatches && game.groundPatches.length > 0) {
         for (let patch of game.groundPatches) {
             // Scroll right to left with the background - simple modulo like trees
@@ -1049,7 +1098,7 @@ function drawBackground() {
     }
     
     // Grass patches on the path (use persistent patches)
-    ctx.fillStyle = '#6B8E23';
+    ctx.fillStyle = isDarkMode() ? '#2a4a3a' : '#6B8E23';
     if (game.grassPatches && game.grassPatches.length > 0) {
         for (let patch of game.grassPatches) {
             // Scroll right to left with the background - simple modulo like trees
@@ -1069,7 +1118,7 @@ function drawBackground() {
     for (let side = 0; side <= 1; side++) {
         const y = side === 0 ? 150 : 350;
         // Grass edge
-        ctx.fillStyle = '#4A7C2E';
+        ctx.fillStyle = isDarkMode() ? '#1a3a2a' : '#4A7C2E';
         ctx.fillRect(0, y - 5, 800, 10);
         
         // Wildflowers (use persistent flower data)
@@ -1089,8 +1138,13 @@ function drawBackground() {
     
     // Lush grass area after road
     const grassGradient = ctx.createLinearGradient(0, 350, 0, 400);
-    grassGradient.addColorStop(0, '#5D8C3A');
-    grassGradient.addColorStop(1, '#4A7C2E');
+    if (isDarkMode()) {
+        grassGradient.addColorStop(0, '#1a3a2a');
+        grassGradient.addColorStop(1, '#153025');
+    } else {
+        grassGradient.addColorStop(0, '#5D8C3A');
+        grassGradient.addColorStop(1, '#4A7C2E');
+    }
     ctx.fillStyle = grassGradient;
     ctx.fillRect(0, 350, 800, 50);
     
@@ -1130,11 +1184,11 @@ function drawGhibliTree(x, y, scale = 1) {
     const trunkWidth = 40 * scale;
     const trunkHeight = 80 * scale;
     
-    ctx.fillStyle = '#4A3425';
+    ctx.fillStyle = isDarkMode() ? '#2a1f1a' : '#4A3425';
     ctx.fillRect(x - trunkWidth/2, y, trunkWidth, trunkHeight);
     
     // Tree roots
-    ctx.fillStyle = '#3D2B1F';
+    ctx.fillStyle = isDarkMode() ? '#1f1510' : '#3D2B1F';
     for (let i = -1; i <= 1; i++) {
         ctx.beginPath();
         ctx.moveTo(x + i * 15 * scale, y + trunkHeight);
@@ -1148,7 +1202,7 @@ function drawGhibliTree(x, y, scale = 1) {
     const canopyY = y - 20 * scale;
     
     // Dark green base
-    ctx.fillStyle = '#2D5016';
+    ctx.fillStyle = isDarkMode() ? '#1a3010' : '#2D5016';
     for (let layer = 0; layer < 3; layer++) {
         for (let i = 0; i < 8; i++) {
             const angle = (i / 8) * Math.PI * 2;
@@ -1162,7 +1216,7 @@ function drawGhibliTree(x, y, scale = 1) {
     }
     
     // Lighter green highlights
-    ctx.fillStyle = '#5D8C3A';
+    ctx.fillStyle = isDarkMode() ? '#2a4a20' : '#5D8C3A';
     for (let i = 0; i < 5; i++) {
         const angle = (i / 5) * Math.PI * 2;
         const leafX = x + Math.cos(angle) * 40 * scale;
@@ -1180,7 +1234,7 @@ function drawWildflower(x, y, type, petalColor) {
     ctx.save();
     
     // Stem
-    ctx.strokeStyle = '#3A5F0B';
+    ctx.strokeStyle = isDarkMode() ? '#2a4010' : '#3A5F0B';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -1703,9 +1757,10 @@ function resizeCanvas() {
     const gameArea = document.querySelector('.game-area');
     const container = document.querySelector('.game-container');
     
-    // Get available space
-    const availableWidth = gameArea.offsetWidth - 40; // Account for padding
-    const availableHeight = window.innerHeight - 300; // Account for header, controls, padding
+    // Get actual available space from the game-area element
+    const availableWidth = gameArea ? gameArea.offsetWidth - 20 : window.innerWidth - 40;
+    // Use the actual height of the game-area instead of fixed offset
+    const availableHeight = gameArea ? gameArea.offsetHeight - 20 : window.innerHeight - 100;
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -1762,6 +1817,9 @@ window.addEventListener('resize', () => {
 
 // Initial setup
 resizeCanvas();
+
+// Initialize theme on page load
+initTheme();
 
 // Initialize clouds on page load
 game.clouds = [];
