@@ -1758,22 +1758,22 @@ function resizeCanvas() {
     const container = document.querySelector('.game-container');
     
     // Get actual available space from the game-area element
-    // Account for header and controls
+    // Maximize canvas size
     let availableWidth, availableHeight;
     
     if (gameArea && gameArea.offsetWidth > 0) {
-        availableWidth = gameArea.offsetWidth - 40;
-        availableHeight = gameArea.offsetHeight - 20;
+        availableWidth = gameArea.offsetWidth - 20;
+        availableHeight = gameArea.offsetHeight - 10;
     } else {
         // Fallback to viewport dimensions
-        // Reserve space for header and controls
-        availableWidth = window.innerWidth * 0.85;
-        availableHeight = window.innerHeight * 0.5; // Reduced to ensure controls are visible
+        // Use most of the viewport
+        availableWidth = window.innerWidth * 0.9;
+        availableHeight = window.innerHeight * 0.65; // Leave room for header and controls
     }
     
-    // Ensure minimum reasonable size but cap maximum
-    availableWidth = Math.max(Math.min(availableWidth, 1200), 400);
-    availableHeight = Math.max(Math.min(availableHeight, 600), 200);
+    // Ensure minimum reasonable size
+    availableWidth = Math.max(availableWidth, 400);
+    availableHeight = Math.max(availableHeight, 200);
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400

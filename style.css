@@ -72,13 +72,13 @@ body {
     background: rgba(255, 255, 255, 0.95); /* Fallback for Xbox */
     background: var(--container-bg);
     border-radius: 20px;
-    padding: 20px;
+    padding: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Fallback for Xbox */
     box-shadow: var(--container-shadow);
-    width: calc(100vw - 40px);
-    max-width: calc(100vw - 40px);
-    height: calc(100vh - 40px);
-    max-height: calc(100vh - 40px);
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    height: calc(100vh - 20px);
+    max-height: calc(100vh - 20px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -89,16 +89,16 @@ body {
 
 .game-header {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     flex-shrink: 0;
 }
 
 .game-header h1 {
     color: var(--primary-color);
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 400;
     text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     letter-spacing: 2px;
     transition: var(--transition);
 }
@@ -109,9 +109,9 @@ body {
 
 .distance-bar {
     max-width: 800px;
-    margin: 0 auto 15px;
+    margin: 0 auto 5px;
     background: var(--distance-bar-bg);
-    padding: 10px;
+    padding: 5px;
     border-radius: 5px;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -146,11 +146,12 @@ body {
 .stat {
     background: var(--stat-bg);
     color: var(--stat-color);
-    padding: 8px 12px;
+    padding: 4px 8px;
     border-radius: 5px;
     font-weight: 400;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     letter-spacing: 1px;
+    font-size: 0.6rem;
     transition: var(--transition);
 }
 
@@ -279,16 +280,16 @@ body {
 
 .game-controls {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 5px;
     flex-shrink: 0;
 }
 
 .btn {
     background: var(--primary-color);
     color: white;
-    border: 3px solid var(--btn-border);
-    padding: 10px 25px;
-    font-size: 0.8rem;
+    border: 2px solid var(--btn-border);
+    padding: 5px 15px;
+    font-size: 0.7rem;
     font-weight: 400;
     border-radius: 5px;
     cursor: pointer;
@@ -309,14 +310,14 @@ body {
 }
 
 .instructions {
-    margin-top: 15px;
+    margin-top: 5px;
     color: var(--text-light);
     transition: var(--transition);
 }
 
 .instructions p {
-    font-size: 0.6rem;
-    line-height: 1.6;
+    font-size: 0.5rem;
+    line-height: 1.4;
 }
 
 /* Game area layout */
@@ -324,8 +325,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin: 10px 0;
+    gap: 10px;
+    margin: 5px 0;
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
