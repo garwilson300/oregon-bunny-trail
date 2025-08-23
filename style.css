@@ -310,27 +310,6 @@ body {
     }
 }
 
-/* Wide screen layout - controls on sides (disabled for TV/Xbox) */
-/* Commenting out to prevent Xbox from showing controls
-@media (min-width: 1025px) and (pointer: coarse), 
-       (min-width: 1025px) and (any-pointer: coarse) {
-    .game-area {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 100%;
-    }
-    
-    #gameCanvas {
-        flex-shrink: 1;
-        max-width: none;
-    }
-    
-    .mobile-controls {
-        flex-shrink: 0;
-    }
-}
-*/
 
 /* Layout adjustments for different screen sizes */
 @media (max-width: 1024px) {
