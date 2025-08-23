@@ -1,0 +1,91 @@
+/* Xbox/Edge TV-specific CSS optimizations */
+/* Add this file to your HTML if experiencing quality issues on Xbox */
+
+/* Force high-quality rendering on Edge/Xbox */
+@supports (-ms-ime-align: auto) or (-ms-accelerator: true) {
+    #gameCanvas {
+        image-rendering: auto !important;
+        -ms-interpolation-mode: bicubic !important;
+        transform: translateZ(0);
+        will-change: transform;
+    }
+    
+    .game-container {
+        transform: scale(1);
+        transform-origin: center;
+        -ms-transform: scale(1);
+        -ms-transform-origin: center;
+    }
+    
+    /* Disable pixelated rendering for text */
+    .game-header h1,
+    .stat,
+    .btn,
+    .instructions {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+}
+
+/* Large screen/TV optimizations */
+@media screen and (min-width: 1920px) {
+    #gameCanvas {
+        image-rendering: auto !important;
+        max-width: 1600px;
+        max-height: 800px;
+    }
+    
+    .game-container {
+        max-width: 1920px;
+        padding: 30px;
+    }
+    
+    .game-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .stat {
+        font-size: 1.2rem;
+        padding: 12px 20px;
+    }
+    
+    .btn {
+        font-size: 1.2rem;
+        padding: 15px 35px;
+    }
+}
+
+/* 4K TV optimizations */
+@media screen and (min-width: 3840px) {
+    #gameCanvas {
+        max-width: 2400px;
+        max-height: 1200px;
+    }
+    
+    .game-container {
+        max-width: 3200px;
+        padding: 50px;
+    }
+    
+    .game-header h1 {
+        font-size: 3.5rem;
+    }
+}
+
+/* Performance optimizations for Edge */
+@supports (-ms-ime-align: auto) {
+    * {
+        -ms-overflow-style: none;
+    }
+    
+    body {
+        -ms-content-zooming: none;
+        -ms-touch-action: none;
+    }
+    
+    #gameCanvas {
+        -ms-high-contrast-adjust: none;
+        -ms-interpolation-mode: bicubic;
+    }
+}
