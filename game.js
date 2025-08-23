@@ -1757,10 +1757,27 @@ function resizeCanvas() {
     const gameArea = document.querySelector('.game-area');
     const container = document.querySelector('.game-container');
     
+    // Detect if we're on a large display (likely TV/Xbox)
+    const isLargeDisplay = window.innerWidth >= 1920;
+    const is4KDisplay = window.innerWidth >= 3840;
+    
+    // Adjust padding based on display size
+    const padding = isLargeDisplay ? 60 : 40;
+    
     // Get actual available space from the game-area element
-    const availableWidth = gameArea ? Math.max(gameArea.offsetWidth - 40, 400) : window.innerWidth - 40;
-    // Use the actual height of the game-area instead of fixed offset
-    const availableHeight = gameArea ? Math.max(gameArea.offsetHeight - 40, 200) : window.innerHeight - 100;
+    let availableWidth = gameArea ? Math.max(gameArea.offsetWidth - padding, 400) : window.innerWidth - 40;
+    let availableHeight = gameArea ? Math.max(gameArea.offsetHeight - padding, 200) : window.innerHeight - 100;
+    
+    // For Xbox/TV displays, use more of the available space
+    if (isLargeDisplay) {
+        availableWidth = Math.max(availableWidth, 1200);
+        availableHeight = Math.max(availableHeight, 600);
+    }
+    
+    if (is4KDisplay) {
+        availableWidth = Math.max(availableWidth, 1600);
+        availableHeight = Math.max(availableHeight, 800);
+    }
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -1798,6 +1815,10 @@ function resizeCanvas() {
     
     // Debug logging
     console.log('Canvas resized:', {
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        isLargeDisplay,
+        is4KDisplay,
         availableWidth,
         availableHeight,
         newWidth,

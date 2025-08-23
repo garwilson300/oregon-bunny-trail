@@ -526,6 +526,53 @@ body {
     transform: scale(0.95);
 }
 
+/* Xbox and TV display optimizations */
+@media screen and (min-width: 1920px) {
+    .game-container {
+        max-width: 1800px;
+        width: 90vw;
+        height: 90vh;
+        max-height: 90vh;
+    }
+    
+    .game-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .btn {
+        font-size: 1.2rem;
+        padding: 15px 35px;
+    }
+    
+    .stat {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+    
+    .instructions p {
+        font-size: 0.9rem;
+    }
+    
+    #gameCanvas {
+        min-width: 1200px;
+        min-height: 600px;
+    }
+}
+
+/* 4K TV displays */
+@media screen and (min-width: 3840px) {
+    .game-container {
+        max-width: 3600px;
+        width: 95vw;
+        height: 92vh;
+    }
+    
+    #gameCanvas {
+        min-width: 1600px;
+        min-height: 800px;
+    }
+}
+
 /* Show portrait message on mobile in portrait orientation */
 @media (max-width: 768px) and (orientation: portrait) {
     .portrait-message {
