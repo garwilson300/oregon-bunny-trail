@@ -69,9 +69,11 @@ body {
 }
 
 .game-container {
+    background: rgba(255, 255, 255, 0.95); /* Fallback for Xbox */
     background: var(--container-bg);
     border-radius: 20px;
     padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Fallback for Xbox */
     box-shadow: var(--container-shadow);
     width: calc(100vw - 40px);
     max-width: calc(100vw - 40px);
@@ -80,6 +82,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease; /* Fallback for Xbox */
     transition: var(--transition);
 }
 
@@ -255,16 +258,22 @@ body {
 }
 
 #gameCanvas {
+    border: 3px solid #5a9fd4; /* Fallback for Xbox */
     border: 3px solid var(--canvas-border);
     border-radius: 10px;
     display: block;
     margin: 0 auto;
+    background: #f0f8ff; /* Fallback for Xbox */
     background: var(--canvas-bg);
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    transition: all 0.3s ease; /* Fallback for Xbox */
     transition: var(--transition);
+    width: 100%;
+    max-width: none;
+    height: auto;
 }
 
 .game-controls {

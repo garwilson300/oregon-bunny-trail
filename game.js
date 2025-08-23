@@ -1900,12 +1900,10 @@ for (let i = 0; i < 40; i++) { // More flowers for better coverage
     });
 }
 
-// Initial canvas setup and draw - delay to ensure DOM is ready
-setTimeout(() => {
-    resizeCanvas();
-    drawBackground();
-    bunny.draw();
-}, 50);
+// Initial canvas setup and draw
+resizeCanvas();
+drawBackground();
+bunny.draw();
 
 // Simple focus management - canvas doesn't need focus for document-level key events
 // Just prevent scrolling on arrow keys which is handled in the keydown listener
