@@ -1481,9 +1481,25 @@ function drawBackground() {
     }
     
     // Totoro-style giant trees in background (drawn AFTER clouds so they appear in front)
-    for (let i = 0; i < 5; i++) {
-        let treeX = ((game.backgroundX * 0.3 + i * 200) % 1000) - 100;
-        if (treeX < 850 && treeX > -50) {
+    for (let i = 0; i < 8; i++) {
+        // Fixed tree positioning to prevent disappearing
+        const treeSpacing = 150;
+        const scrollOffset = game.backgroundX * 0.3;
+        const basePosition = i * treeSpacing;
+        
+        // Calculate tree position with proper wrapping
+        let treeX = basePosition - scrollOffset;
+        
+        // Wrap trees around when they go off screen
+        while (treeX < -100) {
+            treeX += 8 * treeSpacing;
+        }
+        while (treeX > 900) {
+            treeX -= 8 * treeSpacing;
+        }
+        
+        // Only draw trees that are visible
+        if (treeX > -100 && treeX < 900) {
             // Place trees at a consistent horizon line for natural look
             // Trees are rooted at ground level, with slight variation for depth
             const treeY = 105 + (i % 3) * 5; // Slight variation for depth perception
