@@ -1072,7 +1072,10 @@ function drawBackground() {
     for (let i = 0; i < 5; i++) {
         let treeX = ((game.backgroundX * 0.3 + i * 200) % 1000) - 100;
         if (treeX < 850 && treeX > -50) {
-            drawGhibliTree(treeX, 80, 0.5 + (i % 2) * 0.2);
+            // Place trees at a consistent horizon line for natural look
+            // Trees are rooted at ground level, with slight variation for depth
+            const treeY = 105 + (i % 3) * 5; // Slight variation for depth perception
+            drawGhibliTree(treeX, treeY, 0.5 + (i % 2) * 0.2);
         }
     }
     
