@@ -957,6 +957,395 @@ class Vehicle {
     draw() {
         ctx.save();
         
+        // Draw Spirited Away villains in dark mode, vehicles in light mode
+        if (isDarkMode()) {
+            this.drawSpiritedAwayVillain();
+        } else {
+            this.drawVehicle();
+        }
+        
+        ctx.restore();
+    }
+    
+    drawSpiritedAwayVillain() {
+        switch(this.type) {
+            case 'car': // No-Face
+                this.drawNoFace();
+                break;
+            case 'truck': // Stink Spirit
+                this.drawStinkSpirit();
+                break;
+            case 'semi': // Yubaba's bird form
+                this.drawYubabaBird();
+                break;
+        }
+    }
+    
+    drawNoFace() {
+        const centerX = this.x + this.width/2;
+        const centerY = this.y + this.height/2;
+        
+        // No-Face body (dark semi-transparent shadow)
+        ctx.fillStyle = 'rgba(20, 10, 30, 0.8)';
+        ctx.beginPath();
+        // Taller, more ghost-like shape
+        ctx.ellipse(centerX, centerY + 3, this.width/2.2, this.height/1.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Darker inner shadow
+        ctx.fillStyle = 'rgba(10, 5, 20, 0.6)';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY + 5, this.width/2.5, this.height/2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // White mask (oval shaped)
+        ctx.fillStyle = '#f8f8f8';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY - 3, this.width/3.2, this.height/2.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Purple/gray forehead marking (distinctive teardrop shape)
+        ctx.fillStyle = '#9b8fb4';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY - 12, 3, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Purple cheek markings (tear-like streaks under eyes)
+        ctx.fillStyle = '#a394b8';
+        
+        // Left cheek marking
+        ctx.beginPath();
+        ctx.moveTo(centerX - 7, centerY - 3);
+        ctx.quadraticCurveTo(centerX - 8, centerY + 2, centerX - 6, centerY + 6);
+        ctx.quadraticCurveTo(centerX - 5, centerY + 8, centerX - 4, centerY + 6);
+        ctx.quadraticCurveTo(centerX - 5, centerY + 2, centerX - 7, centerY - 3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Right cheek marking
+        ctx.beginPath();
+        ctx.moveTo(centerX + 7, centerY - 3);
+        ctx.quadraticCurveTo(centerX + 8, centerY + 2, centerX + 6, centerY + 6);
+        ctx.quadraticCurveTo(centerX + 5, centerY + 8, centerX + 4, centerY + 6);
+        ctx.quadraticCurveTo(centerX + 5, centerY + 2, centerX + 7, centerY - 3);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Eye holes (perfect circles, deep black voids)
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.arc(centerX - 7, centerY - 6, 2.5, 0, Math.PI * 2);
+        ctx.arc(centerX + 7, centerY - 6, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Mouth (thin dark gray line)
+        ctx.strokeStyle = '#4a4a4a';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 4, centerY + 3);
+        ctx.lineTo(centerX + 4, centerY + 3);
+        ctx.stroke();
+        
+        // Subtle mask edge shadow for depth
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY - 3, this.width/3.2, this.height/2.2, 0, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    
+    drawStinkSpirit() {
+        // Stink Spirit - massive sludge monster from the bathhouse scene
+        const centerX = this.x + this.width/2;
+        const centerY = this.y + this.height/2;
+        
+        // Main sludge body (dark brown-black with dripping effect)
+        const gradient = ctx.createRadialGradient(
+            centerX, centerY - 5, 0,
+            centerX, centerY, this.width/2
+        );
+        gradient.addColorStop(0, '#2a1f1a');
+        gradient.addColorStop(0.5, '#3d2f26');
+        gradient.addColorStop(1, '#1a1511');
+        ctx.fillStyle = gradient;
+        
+        // Amorphous blob shape with dripping sludge
+        ctx.beginPath();
+        for (let i = 0; i <= 16; i++) {
+            const angle = (i / 16) * Math.PI * 2;
+            const wobble = Math.sin(Date.now() * 0.002 + i * 0.8) * 4;
+            const drip = (i % 3 === 0) ? Math.sin(Date.now() * 0.003 + i) * 6 : 0;
+            const radius = (this.width/2) + wobble + drip;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius * 0.7 + (drip > 0 ? drip : 0);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        
+        // Debris and garbage sticking out (bicycle, trash, etc.)
+        ctx.save();
+        
+        // Bicycle wheel outline
+        ctx.strokeStyle = '#4a4a4a';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(centerX - this.width/4, centerY - this.height/4, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        // Spokes
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - this.width/4, centerY - this.height/4);
+            ctx.lineTo(
+                centerX - this.width/4 + Math.cos(angle) * 6,
+                centerY - this.height/4 + Math.sin(angle) * 6
+            );
+            ctx.stroke();
+        }
+        
+        // Random debris pieces
+        ctx.fillStyle = '#5a5a5a';
+        // Pipe
+        ctx.fillRect(centerX + this.width/5, centerY - this.height/3, 3, 12);
+        // Can
+        ctx.beginPath();
+        ctx.arc(centerX - this.width/6, centerY + this.height/4, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+        
+        // Sludge drips falling
+        ctx.fillStyle = '#2a1f1a';
+        for (let i = 0; i < 3; i++) {
+            const dripX = centerX + (i - 1) * this.width/3;
+            const dripProgress = (Date.now() * 0.002 + i) % 2;
+            if (dripProgress < 1) {
+                const dripY = this.y + this.height + dripProgress * 10;
+                ctx.beginPath();
+                ctx.ellipse(dripX, dripY, 2, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Murky surface texture
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        for (let i = 0; i < 5; i++) {
+            const blobX = centerX + Math.sin(Date.now() * 0.001 + i) * this.width/3;
+            const blobY = centerY + Math.cos(Date.now() * 0.001 + i) * this.height/4;
+            ctx.beginPath();
+            ctx.arc(blobX, blobY, 3 + i % 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Stench clouds (more subtle)
+        ctx.strokeStyle = 'rgba(143, 124, 56, 0.2)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < 2; i++) {
+            ctx.beginPath();
+            const cloudX = centerX + (i - 0.5) * 20;
+            const waveOffset = Math.sin(Date.now() * 0.004 + i) * 3;
+            ctx.moveTo(cloudX, this.y - 3);
+            ctx.quadraticCurveTo(
+                cloudX + waveOffset, this.y - 8,
+                cloudX - waveOffset, this.y - 12
+            );
+            ctx.stroke();
+        }
+        
+        // Hidden face area (darker shadow where face might be)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY - this.height/5, this.width/4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Glowing eyes in the darkness (barely visible)
+        ctx.fillStyle = 'rgba(255, 100, 100, 0.4)';
+        ctx.beginPath();
+        ctx.arc(centerX - 6, centerY - this.height/5, 1.5, 0, Math.PI * 2);
+        ctx.arc(centerX + 6, centerY - this.height/5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    drawYubabaBird() {
+        // Yubaba in bird form - large head with distinctive features
+        const centerX = this.x + this.width/2;
+        const centerY = this.y + this.height/2;
+        
+        // Wings (dark feathered, more realistic)
+        const wingFlap = Math.sin(Date.now() * 0.008) * 15;
+        
+        // Left wing with feather details
+        ctx.fillStyle = '#1a1a2e';
+        ctx.save();
+        ctx.translate(centerX - this.width/3, centerY);
+        ctx.rotate(Math.PI/6 - wingFlap * 0.02);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(-15, -wingFlap, -25, -5);
+        ctx.quadraticCurveTo(-20, 5, -15, 10);
+        ctx.quadraticCurveTo(-10, 8, 0, 5);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Wing feather lines
+        ctx.strokeStyle = '#0f0f1e';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(-5 - i*5, 0);
+            ctx.lineTo(-8 - i*6, 5);
+            ctx.stroke();
+        }
+        ctx.restore();
+        
+        // Right wing with feather details
+        ctx.save();
+        ctx.translate(centerX + this.width/3, centerY);
+        ctx.rotate(-Math.PI/6 + wingFlap * 0.02);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(15, -wingFlap, 25, -5);
+        ctx.quadraticCurveTo(20, 5, 15, 10);
+        ctx.quadraticCurveTo(10, 8, 0, 5);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Wing feather lines
+        ctx.strokeStyle = '#0f0f1e';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(5 + i*5, 0);
+            ctx.lineTo(8 + i*6, 5);
+            ctx.stroke();
+        }
+        ctx.restore();
+        
+        // Bird body (smaller, dark)
+        ctx.fillStyle = '#2a2a3e';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY + 5, this.width/4, this.height/3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Yubaba's distinctive large head (oversized compared to bird body)
+        const headSize = this.width/2.5;
+        
+        // Hair bun (tan/light brown like in the movie)
+        ctx.fillStyle = '#d4a574';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY - headSize/2, headSize * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Hair shine/highlights
+        ctx.fillStyle = '#e0b584';
+        ctx.beginPath();
+        ctx.arc(centerX - headSize/4, centerY - headSize/2 - headSize/4, headSize * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Hair details/ornaments (darker brown lines for texture)
+        ctx.strokeStyle = '#b8935f';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        // Spiral pattern in hair
+        for (let i = 0; i < 3; i++) {
+            const angle = (i / 3) * Math.PI * 2;
+            const x = centerX + Math.cos(angle) * headSize * 0.4;
+            const y = centerY - headSize/2 + Math.sin(angle) * headSize * 0.4;
+            ctx.moveTo(x, y);
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+        
+        // Hair pin/ornament (small blue jewel)
+        ctx.fillStyle = '#4169e1';
+        ctx.beginPath();
+        ctx.arc(centerX + headSize/3, centerY - headSize/2, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Face (pale with wrinkles)
+        ctx.fillStyle = '#ffd4aa';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY - 2, headSize/2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Wrinkle lines
+        ctx.strokeStyle = '#d4a574';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(centerX - headSize/3, centerY - 5);
+        ctx.quadraticCurveTo(centerX, centerY - 3, centerX + headSize/3, centerY - 5);
+        ctx.moveTo(centerX - headSize/4, centerY + 2);
+        ctx.quadraticCurveTo(centerX, centerY + 4, centerX + headSize/4, centerY + 2);
+        ctx.stroke();
+        
+        // Beak-like nose (hooked and prominent)
+        ctx.fillStyle = '#ffb380';
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.quadraticCurveTo(centerX - headSize/8, centerY + 3, centerX - headSize/10, centerY + 6);
+        ctx.quadraticCurveTo(centerX, centerY + 8, centerX + headSize/10, centerY + 6);
+        ctx.quadraticCurveTo(centerX + headSize/8, centerY + 3, centerX, centerY);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Nose bridge highlight
+        ctx.strokeStyle = '#ffc8a0';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX, centerY + 5);
+        ctx.stroke();
+        
+        // Menacing eyes with heavy lids
+        ctx.fillStyle = '#2a1a3e';
+        ctx.beginPath();
+        ctx.ellipse(centerX - headSize/4, centerY - 3, 4, 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(centerX + headSize/4, centerY - 3, 4, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Eye pupils (small and beady)
+        ctx.fillStyle = '#8b0000';
+        ctx.beginPath();
+        ctx.arc(centerX - headSize/4, centerY - 3, 1.5, 0, Math.PI * 2);
+        ctx.arc(centerX + headSize/4, centerY - 3, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Eyebrows (angry)
+        ctx.strokeStyle = '#4a5568';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX - headSize/3, centerY - 8);
+        ctx.lineTo(centerX - headSize/5, centerY - 5);
+        ctx.moveTo(centerX + headSize/3, centerY - 8);
+        ctx.lineTo(centerX + headSize/5, centerY - 5);
+        ctx.stroke();
+        
+        // Mouth (grimacing)
+        ctx.strokeStyle = '#8b4513';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(centerX - headSize/5, centerY + 7);
+        ctx.quadraticCurveTo(centerX, centerY + 5, centerX + headSize/5, centerY + 7);
+        ctx.stroke();
+        
+        // Earrings (golden spheres)
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.arc(centerX - headSize/2, centerY, 2, 0, Math.PI * 2);
+        ctx.arc(centerX + headSize/2, centerY, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add shadow under head for depth
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY + headSize/3, headSize/3, headSize/6, 0, 0, Math.PI);
+        ctx.fill();
+    }
+    
+    drawVehicle() {
+        // Original vehicle drawing code
         // Vehicle body
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -1022,8 +1411,6 @@ class Vehicle {
                 ctx.fill();
                 break;
         }
-        
-        ctx.restore();
     }
     
     checkCollision(character) {
