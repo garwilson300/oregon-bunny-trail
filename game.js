@@ -1411,17 +1411,19 @@ function gameLoop() {
         }
     }
     
-    // Spawn carrots
-    game.carrotSpawnTimer++;
-    if (game.carrotSpawnTimer >= game.carrotSpawnInterval) {
-        game.carrotSpawnTimer = 0;
-        // Random Y position in the playable area
-        const yPosition = 150 + Math.random() * 150;
-        carrots.push(new Carrot(canvas.width + 50, yPosition));
+    // Spawn carrots (only if bunny can collect them)
+    if (player1Stats.energy > 0) {
+        game.carrotSpawnTimer++;
+        if (game.carrotSpawnTimer >= game.carrotSpawnInterval) {
+            game.carrotSpawnTimer = 0;
+            // Random Y position in the playable area
+            const yPosition = 150 + Math.random() * 150;
+            carrots.push(new Carrot(canvas.width + 50, yPosition));
+        }
     }
     
-    // Spawn fish (only in multiplayer)
-    if (game.multiplayer) {
+    // Spawn fish (only in multiplayer and if cat can collect them)
+    if (game.multiplayer && player2Stats.energy > 0) {
         game.fishSpawnTimer++;
         if (game.fishSpawnTimer >= game.fishSpawnInterval) {
             game.fishSpawnTimer = 0;
@@ -1456,14 +1458,17 @@ function gameLoop() {
         vehicles.push(vehicle);
     }
     
-    // Spawn soot sprites (very rare)
-    game.sootSpriteSpawnTimer++;
-    if (game.sootSpriteSpawnTimer >= game.sootSpriteSpawnInterval) {
-        game.sootSpriteSpawnTimer = 0;
-        // Random chance to actually spawn (making them even rarer)
-        if (Math.random() < 0.5) { // 50% chance when timer is up
-            const yPosition = 160 + Math.random() * 140; // Spawn in playable area
-            sootSprites.push(new SootSprite(canvas.width + 50, yPosition));
+    // Spawn soot sprites (very rare, only if at least one character can collect them)
+    const canSpawnSootSprites = player1Stats.energy > 0 || (game.multiplayer && player2Stats.energy > 0);
+    if (canSpawnSootSprites) {
+        game.sootSpriteSpawnTimer++;
+        if (game.sootSpriteSpawnTimer >= game.sootSpriteSpawnInterval) {
+            game.sootSpriteSpawnTimer = 0;
+            // Random chance to actually spawn (making them even rarer)
+            if (Math.random() < 0.5) { // 50% chance when timer is up
+                const yPosition = 160 + Math.random() * 140; // Spawn in playable area
+                sootSprites.push(new SootSprite(canvas.width + 50, yPosition));
+            }
         }
     }
     
