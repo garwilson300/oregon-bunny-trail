@@ -2353,9 +2353,33 @@ function resizeCanvas() {
     const gameArea = document.querySelector('.game-area');
     const container = document.querySelector('.game-container');
     
-    // Get available space - using original working calculation
-    const availableWidth = gameArea.offsetWidth - 40; // Account for padding
-    const availableHeight = window.innerHeight - 300; // Account for header, controls, padding
+    // Detect if mobile
+    const isMobile = isMobileDevice();
+    
+    // Get available space
+    let availableWidth, availableHeight;
+    
+    // Check if in fullscreen mode
+    if (isFullscreen) {
+        // In fullscreen, use full viewport
+        availableWidth = window.innerWidth;
+        availableHeight = window.innerHeight;
+    } else if (isMobile) {
+        // On mobile, use viewport dimensions with padding
+        availableWidth = window.innerWidth - 20;
+        // Calculate height based on what's left after header and controls
+        const headerHeight = document.querySelector('.game-header').offsetHeight || 80;
+        const controlsHeight = document.querySelector('.game-controls').offsetHeight || 80;
+        availableHeight = window.innerHeight - headerHeight - controlsHeight - 40;
+    } else {
+        // Desktop calculation
+        availableWidth = gameArea.offsetWidth - 40;
+        availableHeight = window.innerHeight - 300;
+    }
+    
+    // Ensure minimum sizes
+    availableWidth = Math.max(availableWidth, 300);
+    availableHeight = Math.max(availableHeight, 150);
     
     // Calculate scale to maintain aspect ratio (2:1)
     const targetAspectRatio = 2; // 800/400
@@ -2369,6 +2393,18 @@ function resizeCanvas() {
         // Width is limiting factor
         newWidth = availableWidth;
         newHeight = newWidth / targetAspectRatio;
+    }
+    
+    // Cap maximum size on mobile to prevent oversizing (but not in fullscreen)
+    if (isMobile && !isFullscreen) {
+        newWidth = Math.min(newWidth, window.innerWidth - 20);
+        newHeight = Math.min(newHeight, window.innerHeight * 0.5); // Max 50% of viewport height
+        // Recalculate to maintain aspect ratio
+        if (newWidth / newHeight > targetAspectRatio) {
+            newWidth = newHeight * targetAspectRatio;
+        } else {
+            newHeight = newWidth / targetAspectRatio;
+        }
     }
     
     // Get device pixel ratio for crisp rendering
@@ -2503,6 +2539,83 @@ if (isMobileDevice()) {
     game.multiplayer = false;
     orangeCat.active = false;
 }
+
+// Fullscreen functionality
+let isFullscreen = false;
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const fullscreenIcon = document.getElementById('fullscreenIcon');
+const gameArea = document.querySelector('.game-area');
+
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+}
+
+function toggleFullscreen() {
+    isFullscreen = !isFullscreen;
+    
+    if (isFullscreen) {
+        // Enter fullscreen
+        gameArea.classList.add('fullscreen');
+        fullscreenIcon.textContent = '✕'; // X icon to exit
+        document.body.style.overflow = 'hidden';
+        
+        // Request actual fullscreen API if available
+        if (gameArea.requestFullscreen) {
+            gameArea.requestFullscreen().catch(() => {
+                // Fallback to our CSS fullscreen if API fails
+            });
+        } else if (gameArea.webkitRequestFullscreen) {
+            gameArea.webkitRequestFullscreen();
+        }
+    } else {
+        // Exit fullscreen
+        exitFullscreenMode();
+    }
+    
+    // Resize canvas for new dimensions
+    setTimeout(() => {
+        resizeCanvas();
+    }, 100);
+}
+
+function exitFullscreenMode() {
+    isFullscreen = false;
+    gameArea.classList.remove('fullscreen');
+    fullscreenIcon.textContent = '⛶'; // Fullscreen icon
+    document.body.style.overflow = '';
+    
+    // Exit actual fullscreen API if active
+    if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    }
+    
+    // Resize canvas back to normal
+    setTimeout(() => {
+        resizeCanvas();
+    }, 100);
+}
+
+// Handle ESC key to exit fullscreen
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isFullscreen) {
+        exitFullscreenMode();
+    }
+});
+
+// Handle fullscreen API changes
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && isFullscreen) {
+        exitFullscreenMode();
+    }
+});
+
+document.addEventListener('webkitfullscreenchange', () => {
+    if (!document.webkitFullscreenElement && isFullscreen) {
+        exitFullscreenMode();
+    }
+});
 
 // Simple focus management - canvas doesn't need focus for document-level key events
 // Just prevent scrolling on arrow keys which is handled in the keydown listener
