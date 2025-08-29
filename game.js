@@ -2296,7 +2296,12 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     
     if (game.multiplayer) {
         btn.textContent = 'Two Players';
-        instructions.innerHTML = 'Player 1 (Bunny): Arrow keys ↑ ↓ ← → | Player 2 (Cat): WASD keys';
+        const isMobile = isMobileDevice();
+        if (isMobile) {
+            instructions.innerHTML = '<strong>Swipe controls:</strong> Left side = Bunny | Right side = Cat';
+        } else {
+            instructions.innerHTML = 'Player 1 (Bunny): Arrow keys ↑ ↓ ← → | Player 2 (Cat): WASD keys';
+        }
         // Show multiplayer stats, hide single player stats and distance bar
         singleStats.style.display = 'none';
         multiStats.style.display = 'flex';
@@ -2313,7 +2318,12 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
         player2Stats.energy = 100;
     } else {
         btn.textContent = 'Single Player';
-        instructions.innerHTML = 'Help Oregon Bunny hop to Oregon! Use arrow keys ↑ ↓ ← → to hop in any direction';
+        const isMobile = isMobileDevice();
+        if (isMobile) {
+            instructions.innerHTML = 'Help Oregon Bunny hop to Oregon! <strong>Swipe in any direction to hop</strong>';
+        } else {
+            instructions.innerHTML = 'Help Oregon Bunny hop to Oregon! Use arrow keys ↑ ↓ ← → to hop in any direction';
+        }
         // Show single player stats and distance bar, hide multiplayer stats
         singleStats.style.display = 'flex';
         multiStats.style.display = 'none';
@@ -2474,10 +2484,139 @@ resizeCanvas();
 drawBackground();
 bunny.draw();
 
+// Show mobile swipe hint if on mobile device
+if (isMobileDevice()) {
+    const swipeHint = document.querySelector('.mobile-swipe-hint');
+    if (swipeHint) swipeHint.style.display = 'block';
+    
+    // Update initial instructions for mobile
+    const instructionText = document.getElementById('instructionText');
+    if (instructionText && !game.multiplayer) {
+        instructionText.innerHTML = 'Help Oregon Bunny hop to Oregon! <strong>Swipe in any direction to hop</strong>';
+    }
+    
+    // Hide multiplayer button on mobile - too complex for touch controls
+    const multiplayerBtn = document.getElementById('multiplayerBtn');
+    if (multiplayerBtn) {
+        multiplayerBtn.style.display = 'none';
+    }
+    
+    // Ensure single player mode on mobile
+    game.multiplayer = false;
+    orangeCat.active = false;
+}
+
 // Simple focus management - canvas doesn't need focus for document-level key events
 // Just prevent scrolling on arrow keys which is handled in the keydown listener
 
-// Mobile controls
+// Mobile Touch Controls - Swipe Gestures
+let touchStartX = null;
+let touchStartY = null;
+let touchStartTime = null;
+const MIN_SWIPE_DISTANCE = 30; // Minimum distance for a swipe
+const MAX_SWIPE_TIME = 300; // Maximum time for a swipe in ms
+
+// Detect if device is mobile/touch
+function isMobileDevice() {
+    return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+}
+
+// Handle touch start
+canvas.addEventListener('touchstart', (e) => {
+    if (!game.running || game.gameOver) return;
+    
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+    e.preventDefault();
+});
+
+// Handle touch move (optional - for visual feedback)
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Prevent scrolling
+});
+
+// Handle touch end - detect swipe
+canvas.addEventListener('touchend', (e) => {
+    if (!game.running || game.gameOver || !touchStartX || !touchStartY) return;
+    
+    const touch = e.changedTouches[0];
+    const touchEndX = touch.clientX;
+    const touchEndY = touch.clientY;
+    const touchEndTime = Date.now();
+    
+    // Calculate swipe distance and time
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const deltaTime = touchEndTime - touchStartTime;
+    
+    // Check if it's a valid swipe
+    if (deltaTime > MAX_SWIPE_TIME) {
+        // Too slow, not a swipe
+        touchStartX = null;
+        touchStartY = null;
+        return;
+    }
+    
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    
+    // Determine swipe direction
+    let direction = null;
+    if (absX > absY && absX > MIN_SWIPE_DISTANCE) {
+        // Horizontal swipe
+        direction = deltaX > 0 ? 'right' : 'left';
+    } else if (absY > absX && absY > MIN_SWIPE_DISTANCE) {
+        // Vertical swipe
+        direction = deltaY > 0 ? 'down' : 'up';
+    }
+    
+    // Execute hop based on swipe direction
+    if (direction) {
+        // Mobile is always single player - control bunny only
+        if (CharacterSystem.canAct(bunny, player1Stats)) {
+            bunny.hop(direction);
+        }
+    }
+    
+    // Reset touch tracking
+    touchStartX = null;
+    touchStartY = null;
+    touchStartTime = null;
+    
+    e.preventDefault();
+});
+
+// Tap-to-move alternative control (optional)
+let tapToMoveEnabled = false; // Can be toggled in settings
+
+canvas.addEventListener('click', (e) => {
+    if (!tapToMoveEnabled || !game.running || game.gameOver) return;
+    if (!isMobileDevice()) return; // Only on mobile
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Convert click position to game coordinates
+    const gameX = (x / rect.width) * canvas.width;
+    const gameY = (y / rect.height) * canvas.height;
+    
+    // Mobile is single player only - control bunny
+    if (CharacterSystem.canAct(bunny, player1Stats)) {
+        const deltaX = gameX - bunny.x;
+        const deltaY = gameY - bunny.y;
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            bunny.hop(deltaX > 0 ? 'right' : 'left');
+        } else {
+            bunny.hop(deltaY > 0 ? 'down' : 'up');
+        }
+    }
+});
+
+// Old D-pad controls (keeping for backwards compatibility)
 const mobileButtons = document.querySelectorAll('.dpad-btn');
 mobileButtons.forEach(btn => {
     // Touch start (or mouse down for testing)

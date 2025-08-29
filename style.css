@@ -258,6 +258,18 @@ body {
     line-height: 1.6;
 }
 
+.mobile-swipe-hint {
+    color: #5a9fd4;
+    font-weight: bold;
+    margin-top: 5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
 /* Game area layout */
 .game-area {
     display: flex;
@@ -273,9 +285,9 @@ body {
 }
 
 
-/* Mobile controls */
+/* Mobile controls - Hidden by default as we use swipe gestures */
 .mobile-controls {
-    display: none !important; /* Force hide by default */
+    display: none !important; /* Hidden - using swipe gestures instead */
     justify-content: center;
     align-items: center;
 }
@@ -684,9 +696,10 @@ body {
     
     #gameCanvas {
         width: auto;
-        height: calc(100vh - 180px);
-        max-height: 200px;
+        height: calc(100vh - 140px); /* More height without D-pad */
+        max-height: 280px; /* Increased from 200px */
         border: 2px solid #5a9fd4;
+        touch-action: none; /* Prevent default touch behaviors */
     }
     
     .game-area {
@@ -734,9 +747,9 @@ body {
         line-height: 1.4;
     }
     
-    /* Mobile controls for iPhone landscape */
+    /* Mobile controls for iPhone landscape - HIDDEN, using swipe gestures */
     .mobile-controls {
-        display: flex !important;
+        display: none !important; /* Using swipe gestures instead */
     }
     
     .control-label {
