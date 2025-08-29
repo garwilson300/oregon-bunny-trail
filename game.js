@@ -2292,7 +2292,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
     const singleStats = document.getElementById('singlePlayerStats');
     const multiStats = document.getElementById('multiplayerStats');
     const distanceBar = document.querySelector('.distance-bar');
-    const player2Controls = document.querySelector('.player2-controls');
+    // D-pad controls removed - no longer needed
     
     if (game.multiplayer) {
         btn.textContent = 'Two Players';
@@ -2306,8 +2306,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
         singleStats.style.display = 'none';
         multiStats.style.display = 'flex';
         if (distanceBar) distanceBar.style.display = 'none';
-        // Show player 2 mobile controls
-        if (player2Controls) player2Controls.style.display = 'block';
+        // D-pad controls removed - using swipe gestures
         // Reset Orange Cat position
         orangeCat.x = 100;
         orangeCat.y = 210;
@@ -2328,8 +2327,7 @@ document.getElementById('multiplayerBtn').addEventListener('click', () => {
         singleStats.style.display = 'flex';
         multiStats.style.display = 'none';
         if (distanceBar) distanceBar.style.display = 'block';
-        // Hide player 2 mobile controls
-        if (player2Controls) player2Controls.style.display = 'none';
+        // D-pad controls removed - using swipe gestures
         // Clear fish array when switching to single player
         fish.length = 0;
     }
@@ -2616,36 +2614,4 @@ canvas.addEventListener('click', (e) => {
     }
 });
 
-// Old D-pad controls (keeping for backwards compatibility)
-const mobileButtons = document.querySelectorAll('.dpad-btn');
-mobileButtons.forEach(btn => {
-    // Touch start (or mouse down for testing)
-    btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const player = btn.dataset.player;
-        const direction = btn.dataset.direction;
-        
-        if (game.running && !game.gameOver) {
-            if (player === '1' && CharacterSystem.canAct(bunny, player1Stats)) {
-                bunny.hop(direction);
-            } else if (player === '2' && game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
-                orangeCat.hop(direction);
-            }
-        }
-    });
-    
-    // Also add click for desktop testing
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const player = btn.dataset.player;
-        const direction = btn.dataset.direction;
-        
-        if (game.running && !game.gameOver) {
-            if (player === '1' && CharacterSystem.canAct(bunny, player1Stats)) {
-                bunny.hop(direction);
-            } else if (player === '2' && game.multiplayer && CharacterSystem.canAct(orangeCat, player2Stats)) {
-                orangeCat.hop(direction);
-            }
-        }
-    });
-});
+// D-pad controls removed - using swipe gestures on mobile instead

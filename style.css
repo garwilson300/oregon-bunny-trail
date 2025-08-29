@@ -285,70 +285,10 @@ body {
 }
 
 
-/* Mobile controls - Hidden by default as we use swipe gestures */
-.mobile-controls {
-    display: none !important; /* Hidden - using swipe gestures instead */
-    justify-content: center;
-    align-items: center;
-}
+/* D-pad controls removed - using swipe gestures on mobile */
 
-.player1-controls,
-.player2-controls {
-    text-align: center;
-}
-
-.control-label {
-    font-weight: 400;
-    color: #5a9fd4;
-    margin-bottom: 10px;
-    font-size: 0.6rem;
-    letter-spacing: 1px;
-}
-
-.dpad {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
-.dpad-middle {
-    display: flex;
-    gap: 5px;
-}
-
-.dpad-btn {
-    background: #5a9fd4;
-    color: white;
-    border: none;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.1s ease;
-    font-family: 'Fredoka', cursive;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-}
-
-.dpad-btn:active {
-    background: #4a8fc4;
-    transform: scale(0.95);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Show mobile controls ONLY on small touch devices (phones/tablets) */
+/* Mobile touch devices */
 @media (max-width: 768px) and (pointer: coarse) {
-    .mobile-controls {
-        display: flex !important;
-    }
-    
     .instructions p {
         font-size: 0.8rem;
     }
@@ -357,28 +297,12 @@ body {
 
 /* Layout adjustments for different screen sizes */
 @media (max-width: 1024px) {
-    /* On medium screens, stack controls below canvas */
     .game-area {
         flex-direction: column;
     }
     
-    .left-controls,
-    .right-controls {
-        display: flex;
-        gap: 40px;
-    }
-    
-    .left-controls {
-        order: 2;
-    }
-    
     #gameCanvas {
         order: 1;
-    }
-    
-    .right-controls {
-        order: 3;
-        margin-top: -20px;
     }
 }
 
@@ -530,18 +454,7 @@ body {
     color: #ce93d8;
 }
 
-[data-theme="dark"] .control-label {
-    color: #ba68c8;
-    text-shadow: 1px 1px 2px rgba(142, 36, 170, 0.6);
-}
-
-[data-theme="dark"] .dpad-btn {
-    background: #2e5090;
-}
-
-[data-theme="dark"] .dpad-btn:active {
-    background: #1e3a5f;
-}
+/* D-pad dark mode styles removed */
 
 [data-theme="dark"] .portrait-message {
     background: linear-gradient(to bottom, #1a1a2e 0%, #0f3460 100%);
@@ -611,23 +524,7 @@ body {
         font-size: 0.7rem;
     }
     
-    .control-label {
-        font-size: 0.8rem;
-        margin-bottom: 5px;
-    }
-    
-    .dpad-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
-    }
-    
-    /* Hide mobile controls in landscape if not touch device */
-    @media (hover: hover) {
-        .mobile-controls {
-            display: none !important;
-        }
-    }
+    /* D-pad controls removed - using swipe gestures */
 }
 
 /* iPhone landscape mode specific styles (iPhone 12/13/14 landscape: 844x390, iPhone SE/8: 667x375) */
@@ -747,30 +644,7 @@ body {
         line-height: 1.4;
     }
     
-    /* Mobile controls for iPhone landscape - HIDDEN, using swipe gestures */
-    .mobile-controls {
-        display: none !important; /* Using swipe gestures instead */
-    }
-    
-    .control-label {
-        font-size: 0.4rem;
-        margin-bottom: 3px;
-    }
-    
-    .dpad {
-        gap: 2px;
-    }
-    
-    .dpad-middle {
-        gap: 2px;
-    }
-    
-    .dpad-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 0.9rem;
-        border-radius: 5px;
-    }
+    /* D-pad controls removed - using swipe gestures */
     
     /* Multiplayer stats adjustments */
     .multiplayer-stats {
@@ -826,15 +700,5 @@ body {
         flex-direction: column;
     }
     
-    .mobile-controls {
-        display: flex !important;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .dpad-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.3rem;
-    }
+    /* D-pad controls removed - using swipe gestures */
 }
